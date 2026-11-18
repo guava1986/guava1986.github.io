@@ -1,0 +1,1337 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>英语学习网站</title>
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2.25rem; }
+
+      :root {
+        --bg: #f6f3ec;
+        --paper: #fffdf7;
+        --ink: #221d15;
+        --muted: #71685a;
+        --line: #e2dac8;
+        --accent: #b03a26;
+        --accent-soft: #f7e3dc;
+        --hl: #fcefc6;
+        --word-hover: #f6e7d2;
+        --word-sel: #f3c98b;
+        --chip: #efe8d8;
+        --shadow: 0 10px 30px rgba(60, 45, 20, .14);
+        --reader-size: 1.16rem;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #131417;
+          --paper: #1e1f24;
+          --ink: #ece7da;
+          --muted: #a79d8b;
+          --line: #35363d;
+          --accent: #e2704f;
+          --accent-soft: #3d2620;
+          --hl: #57451c;
+          --word-hover: #2e2b25;
+          --word-sel: #7a5a1e;
+          --chip: #28261f;
+          --shadow: 0 10px 30px rgba(0, 0, 0, .5);
+        }
+      }
+
+      /* ---------- preset themes (override system scheme once chosen) ---------- */
+      html[data-theme="paper"] {
+        --bg: #f6f3ec;
+        --paper: #fffdf7;
+        --ink: #221d15;
+        --muted: #71685a;
+        --line: #e2dac8;
+        --accent: #b03a26;
+        --accent-soft: #f7e3dc;
+        --hl: #fcefc6;
+        --word-hover: #f6e7d2;
+        --word-sel: #f3c98b;
+        --chip: #efe8d8;
+        --shadow: 0 10px 30px rgba(60, 45, 20, .14);
+      }
+      html[data-theme="snow"] {
+        --bg: #eceff1;
+        --paper: #ffffff;
+        --ink: #1f2328;
+        --muted: #656d76;
+        --line: #d8dee4;
+        --accent: #1f5fa6;
+        --accent-soft: #ddeaf7;
+        --hl: #ffedb0;
+        --word-hover: #e8f0f8;
+        --word-sel: #a8c8ec;
+        --chip: #f0f2f4;
+        --shadow: 0 10px 30px rgba(30, 50, 80, .10);
+      }
+      html[data-theme="eye"] {
+        --bg: #d9e6d2;
+        --paper: #eef4e6;
+        --ink: #2e3a2a;
+        --muted: #5f7059;
+        --line: #bccfb2;
+        --accent: #3a7d2c;
+        --accent-soft: #d3e8c3;
+        --hl: #fdf0a6;
+        --word-hover: #ddebd2;
+        --word-sel: #a9d18a;
+        --chip: #e0ecd6;
+        --shadow: 0 10px 30px rgba(50, 80, 40, .12);
+      }
+      html[data-theme="ocean"] {
+        --bg: #dcebf2;
+        --paper: #f4fafc;
+        --ink: #1d3342;
+        --muted: #5b7686;
+        --line: #bcd4e0;
+        --accent: #0f6f8f;
+        --accent-soft: #cfeaf3;
+        --hl: #ffe9a8;
+        --word-hover: #d9edf5;
+        --word-sel: #8ec9de;
+        --chip: #e2f0f5;
+        --shadow: 0 10px 30px rgba(20, 70, 95, .12);
+      }
+      html[data-theme="night"] {
+        --bg: #131417;
+        --paper: #1e1f24;
+        --ink: #ece7da;
+        --muted: #a79d8b;
+        --line: #35363d;
+        --accent: #e2704f;
+        --accent-soft: #3d2620;
+        --hl: #57451c;
+        --word-hover: #2e2b25;
+        --word-sel: #7a5a1e;
+        --chip: #28261f;
+        --shadow: 0 10px 30px rgba(0, 0, 0, .5);
+      }
+      html[data-theme="paper"] .btn.primary,
+      html[data-theme="snow"] .btn.primary,
+      html[data-theme="eye"] .btn.primary,
+      html[data-theme="ocean"] .btn.primary { color: #fff; font-weight: 400; }
+      html[data-theme="night"] .btn.primary { color: #181410; font-weight: 600; }
+      html[data-theme="paper"] .playbar .pbtn.main,
+      html[data-theme="snow"] .playbar .pbtn.main,
+      html[data-theme="eye"] .playbar .pbtn.main,
+      html[data-theme="ocean"] .playbar .pbtn.main { color: #fff; }
+      html[data-theme="night"] .playbar .pbtn.main { color: #181410; }
+
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        line-height: 1.55;
+      }
+
+      /* ---------- toolbar ---------- */
+      .toolbar {
+        position: sticky; top: 0; z-index: 30;
+        display: flex; flex-wrap: wrap; align-items: center; gap: .5rem;
+        padding: .55rem .9rem;
+        background: var(--paper);
+        border-bottom: 1px solid var(--line);
+      }
+      .toolbar .brand {
+        font-family: Georgia, "Times New Roman", serif;
+        font-weight: 700; font-size: 1.02rem; letter-spacing: .02em;
+        margin-right: .35rem; white-space: nowrap;
+      }
+      .toolbar .brand em { color: var(--accent); font-style: normal; }
+      .btn {
+        appearance: none; border: 1px solid var(--line); background: var(--paper);
+        color: var(--ink); border-radius: 8px; padding: .35rem .8rem;
+        font-size: .9rem; cursor: pointer; display: inline-flex; align-items: center; gap: .4rem;
+      }
+      .btn:hover { border-color: var(--accent); }
+      .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+      @media (prefers-color-scheme: dark) { .btn.primary { color: #181410; font-weight: 600; } }
+      .btn svg { width: 15px; height: 15px; flex: none; }
+      .stats { margin-left: auto; color: var(--muted); font-size: .83rem; white-space: nowrap; }
+      .doc-title { font-size: .83rem; color: var(--muted); max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+      /* ---------- theme picker ---------- */
+      .theme-picker { display: inline-flex; align-items: center; flex-wrap: wrap; gap: .35rem; }
+      .theme-picker .theme-label { font-size: .83rem; color: var(--muted); white-space: nowrap; }
+      .theme-btn {
+        appearance: none; border: none; background: none; background-color: transparent;
+        box-shadow: none; color: var(--muted); border-radius: 0; padding: .3rem .45rem;
+        font-size: .83rem; cursor: pointer; line-height: 1.3;
+      }
+      .theme-btn:hover { color: var(--accent); }
+      .theme-btn.is-active { background: none; color: var(--accent); font-weight: 700; text-decoration: underline; text-underline-offset: 4px; }
+
+      /* ---------- layout ---------- */
+      .layout {
+        display: grid; grid-template-columns: minmax(0, 1fr) 350px;
+        gap: 1.1rem; max-width: 1240px; margin: 0 auto;
+        padding: 1.1rem .9rem 3rem; align-items: start;
+      }
+
+      /* ---------- playback (bottom player, hidden until first play click) ---------- */
+      .player-bar {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 70;
+        background: var(--paper); border-top: 1px solid var(--line);
+        box-shadow: 0 -8px 28px rgba(40, 30, 10, .16);
+        padding: .6rem .9rem calc(.6rem + env(safe-area-inset-bottom));
+        transform: translateY(calc(100% + 12px)); visibility: hidden;
+        transition: transform .25s ease, visibility 0s linear .25s;
+      }
+      .player-bar.show {
+        transform: translateY(0); visibility: visible;
+        transition: transform .25s ease;
+      }
+      .player-inner { max-width: 1240px; margin: 0 auto; position: relative; padding-right: 3rem; }
+      body.player-visible .layout { padding-bottom: 7.5rem; }
+      .playbar { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem 1rem; }
+      .playbar .transport { display: flex; align-items: center; gap: .45rem; }
+      .playbar .font-row { display: flex; align-items: center; gap: .5rem; font-size: .8rem; color: var(--muted); }
+      .player-status {
+        font-size: .83rem; color: var(--muted); white-space: nowrap;
+        font-variant-numeric: tabular-nums; min-width: 0;
+      }
+      .player-close {
+        position: absolute; top: 0; right: 0; margin-left: 0;
+        width: 2.25rem; height: 2.25rem; min-height: 2.25rem; border-radius: 50%;
+        border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+        cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+        padding: 0; font-size: .95rem; flex: none; z-index: 1;
+      }
+      .player-close:hover { border-color: var(--accent); color: var(--accent); }
+      .panel .card { min-height: 0; }
+      .panel-open-btn { display: none; }
+      .playbar .pbtn {
+        width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 1px solid var(--line);
+        background: var(--paper); color: var(--ink); cursor: pointer;
+        display: inline-flex; align-items: center; justify-content: center; padding: 0;
+      }
+      .playbar .pbtn.main { background: var(--accent); border-color: var(--accent); color: #fff; width: 2.8rem; height: 2.8rem; }
+      @media (prefers-color-scheme: dark) { .playbar .pbtn.main { color: #181410; } }
+      .playbar .pbtn svg { width: 17px; height: 17px; }
+      .playbar .pbtn.main svg { width: 19px; height: 19px; }
+      .playbar label { font-size: .8rem; color: var(--muted); display: flex; align-items: center; gap: .5rem; }
+      .playbar label.rate-label { flex: 0 1 13rem; }
+      .playbar label.voice-label { flex: 0 1 15rem; }
+      .playbar select {
+        flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 8px;
+        background: var(--paper); color: var(--ink); font-size: .85rem; padding: .3rem .4rem;
+      }
+      .playbar input[type="range"] { flex: 1; min-width: 4.5rem; accent-color: var(--accent); min-height: 2.25rem; }
+      .playbar .rate-val { font-variant-numeric: tabular-nums; min-width: 2.2em; }
+      .playbar .hint { font-size: .8rem; color: var(--muted); margin: 0; line-height: 1.5; }
+      .fontsize { display: inline-flex; gap: .25rem; }
+      .fontsize button {
+        border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+        border-radius: 8px; padding: .3rem .55rem; cursor: pointer; font-size: .85rem;
+      }
+
+      /* ---------- reader ---------- */
+      .reader-card {
+        background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
+        padding: 1.6rem 1.7rem 2rem; box-shadow: var(--shadow);
+      }
+      .reader-card.dragover { outline: 2px dashed var(--accent); outline-offset: -8px; }
+      #reader {
+        font-family: Georgia, "Iowan Old Style", "Times New Roman", "Songti SC", serif;
+        font-size: var(--reader-size); line-height: 1.95; overflow-wrap: break-word;
+      }
+      #reader p { margin: 0; }
+      .para-block { margin: 0 0 1.15em; }
+      .para-block:last-child { margin-bottom: 0; }
+      .para-tools { display: flex; justify-content: flex-end; margin-top: .5rem; }
+      .para-actions {
+        display: inline-flex; align-items: stretch;
+        border: 1px solid var(--line); border-radius: 999px; overflow: hidden;
+        background: var(--paper);
+      }
+      .para-action-btn {
+        appearance: none; border: none; background: transparent;
+        color: var(--muted); padding: .38rem .85rem;
+        font-size: .82rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: .35rem; line-height: 1.3;
+      }
+      .para-action-btn + .para-action-btn { border-left: 1px solid var(--line); }
+      .para-action-btn:hover { color: var(--accent); }
+      .para-action-btn svg { width: 14px; height: 14px; flex: none; }
+      .para-action-btn.is-playing { color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+      .para-translate-btn[aria-expanded="true"] { color: var(--accent); background: var(--accent-soft); }
+      .para-action-btn:disabled { opacity: .65; cursor: wait; }
+      .para-translation {
+        display: none; margin-top: .55rem; padding: .75rem .85rem;
+        background: var(--chip); border: 1px solid var(--line); border-radius: 10px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        font-size: .94rem; line-height: 1.75; color: var(--ink);
+      }
+      .para-translation.show { display: block; }
+      .para-translation .pt-label { display: block; font-size: .72rem; letter-spacing: .08em; color: var(--muted); margin-bottom: .3rem; font-weight: 600; }
+      .para-translation .pt-error { color: var(--muted); font-size: .88rem; }
+      #reader .sent { border-radius: 4px; padding: .06em 0; transition: background .18s; cursor: pointer; }
+      #reader .sent.sel { background: var(--accent-soft); }
+      #reader .sent.active { background: var(--hl); }
+      #reader .w { border-radius: 3px; cursor: pointer; padding: .02em 0; }
+      #reader .w:hover { background: var(--word-hover); }
+      #reader .w.sel { background: var(--word-sel); }
+      .empty-note { color: var(--muted); font-family: inherit; }
+
+      /* ---------- side panel ---------- */
+      .panel {
+        position: sticky; top: 66px;
+        display: flex; flex-direction: column; gap: 1rem;
+        max-height: calc(100vh - 84px);
+      }
+      .card {
+        background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
+        padding: 1rem 1.05rem 1.1rem; box-shadow: var(--shadow); overflow-y: auto;
+      }
+      .card h2 { font-size: .82rem; letter-spacing: .08em; color: var(--muted); margin: 0 0 .6rem; font-weight: 600; }
+      .panel-close { display: none; }
+
+      .word-head { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
+      .word-head .word {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 1.75rem; font-weight: 700; line-height: 1.15;
+      }
+      .word-head .phonetic { color: var(--muted); font-size: 1rem; }
+      .speak-btn {
+        margin-left: auto; width: 2.4rem; height: 2.4rem; border-radius: 50%;
+        border: 1px solid var(--line); background: var(--paper); color: var(--accent);
+        cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0;
+      }
+      .speak-btn svg { width: 17px; height: 17px; }
+      .zh { font-size: 1.06rem; margin: .45rem 0 .1rem; }
+      .zh:empty { display: none; }
+      .pos { color: var(--accent); font-style: italic; font-family: Georgia, serif; font-size: .92rem; margin-top: .8rem; }
+      .def { margin: .25rem 0 .1rem; font-size: .95rem; }
+      .def .num { color: var(--muted); margin-right: .35rem; }
+      .example { color: var(--muted); font-size: .9rem; font-style: italic; margin: .15rem 0 .3rem 1.1rem; }
+      .example-row { display: flex; align-items: flex-start; gap: .3rem; margin: .15rem 0 .3rem 1.1rem; }
+      .example-row .example { margin: 0; flex: 1; min-width: 0; }
+      .example-speak {
+        flex: none; width: 2.25rem; height: 2.25rem; border-radius: 50%;
+        border: 1px solid var(--line); background: var(--paper); color: var(--accent);
+        cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0;
+        margin-top: -.2rem;
+      }
+      .example-speak:hover { border-color: var(--accent); }
+      .example-speak svg { width: 14px; height: 14px; }
+      .rel-title { font-size: .8rem; color: var(--muted); margin: .8rem 0 .35rem; letter-spacing: .05em; }
+      .chips { display: flex; flex-wrap: wrap; gap: .35rem; }
+      .chip {
+        background: var(--chip); border: 1px solid var(--line); border-radius: 999px;
+        padding: .28rem .7rem; font-size: .86rem; cursor: pointer; color: var(--ink);
+        font-family: Georgia, "Times New Roman", serif;
+      }
+      .chip:hover { border-color: var(--accent); color: var(--accent); }
+      .panel-actions { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1rem; }
+      .panel-actions .btn { font-size: .85rem; }
+      .sent-translation {
+        margin-top: .8rem; padding: .6rem .7rem; border-radius: 10px;
+        background: var(--chip); font-size: .92rem; display: none;
+      }
+      .sent-translation.show { display: block; }
+      .loading { color: var(--muted); font-size: .92rem; padding: .6rem 0; }
+      .notfound { color: var(--muted); font-size: .92rem; }
+      .word-hint { color: var(--muted); font-size: .93rem; margin: 0; }
+
+      .vocab-list { list-style: none; margin: 0; padding: 0; }
+      .vocab-list li {
+        display: flex; align-items: baseline; gap: .55rem;
+        padding: .42rem .1rem; border-bottom: 1px dashed var(--line); cursor: pointer;
+      }
+      .vocab-list li:last-child { border-bottom: none; }
+      .vocab-list .vw { font-family: Georgia, serif; font-weight: 700; }
+      .vocab-list .vg { color: var(--muted); font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .vocab-list .vx { margin-left: auto; color: var(--muted); background: none; border: none; cursor: pointer; font-size: 1rem; padding: .2rem .35rem; min-height: 2rem; }
+      .vocab-empty { color: var(--muted); font-size: .9rem; margin: 0; }
+      .vocab-actions { display: flex; gap: .45rem; margin-top: .7rem; }
+      .vocab-actions .btn { font-size: .83rem; }
+
+      /* ---------- paste overlay ---------- */
+      .overlay {
+        position: fixed; inset: 0; z-index: 60; display: none;
+        background: rgba(20, 16, 8, .5); padding: 1rem;
+        align-items: center; justify-content: center;
+      }
+      .overlay.open { display: flex; }
+      .overlay .sheet {
+        background: var(--paper); color: var(--ink); border-radius: 14px;
+        width: min(680px, 100%); max-height: 88vh; display: flex; flex-direction: column;
+        padding: 1.1rem; box-shadow: var(--shadow);
+      }
+      .overlay h3 { margin: 0 0 .3rem; font-size: 1.05rem; }
+      .overlay p { margin: 0 0 .7rem; color: var(--muted); font-size: .88rem; }
+      .overlay textarea {
+        flex: 1; min-height: 240px; resize: vertical; border: 1px solid var(--line);
+        border-radius: 10px; padding: .7rem; font-size: .95rem; line-height: 1.6;
+        background: var(--bg); color: var(--ink);
+        font-family: Georgia, "Times New Roman", serif;
+      }
+      .overlay .row { display: flex; gap: .5rem; justify-content: flex-end; margin-top: .8rem; }
+
+      .toast {
+        position: fixed; left: 50%; bottom: 1.2rem; transform: translateX(-50%) translateY(20px);
+        background: var(--ink); color: var(--bg); padding: .55rem 1rem; border-radius: 999px;
+        font-size: .88rem; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 80;
+        max-width: calc(100vw - 2rem); text-align: center;
+      }
+      .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+      body.player-visible .toast { bottom: 7.2rem; }
+
+      /* ---------- mobile ---------- */
+      @media (max-width: 940px) {
+        .layout { grid-template-columns: minmax(0, 1fr); padding-bottom: 5rem; }
+        body.player-visible .layout { padding-bottom: 11rem; }
+        .player-bar { padding: .55rem .7rem calc(.55rem + env(safe-area-inset-bottom)); }
+        .playbar { gap: .45rem .7rem; }
+        .playbar label.rate-label { flex: 1 1 9rem; }
+        .playbar label.voice-label { flex: 1 1 10rem; }
+        .player-status { order: 5; flex: 1 1 100%; }
+        .player-close { margin-left: 0; }
+        body.player-visible .toast { bottom: 10.6rem; }
+        .panel-open-btn { display: inline-flex; }
+        .panel .card { flex: none; min-height: auto; }
+        .stats { display: none; }
+        .reader-card { padding: 1.15rem 1.05rem 1.5rem; }
+        .para-tools { justify-content: stretch; }
+        .para-actions { flex: 1; }
+        .para-action-btn { flex: 1; padding-top: .55rem; padding-bottom: .55rem; }
+        .panel {
+          position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 50;
+          max-height: 62vh; padding: .6rem .6rem calc(.6rem + env(safe-area-inset-bottom));
+          background: var(--bg); border-top: 1px solid var(--line);
+          transform: translateY(calc(100% + 4px)); transition: transform .25s ease;
+          overflow-y: auto;
+        }
+        body.panel-open .panel { transform: translateY(0); }
+        .panel-close {
+          display: inline-flex; align-self: flex-end; align-items: center; justify-content: center;
+          width: 2.4rem; height: 2.4rem; border-radius: 50%; border: 1px solid var(--line);
+          background: var(--paper); color: var(--ink); cursor: pointer; font-size: 1.05rem; padding: 0;
+        }
+        .card { max-height: none; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .panel, #reader .sent, .toast, .player-bar { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="toolbar">
+      <span class="brand">读<em>·</em>Reading Lab</span>
+      <button class="btn primary" id="btnFile" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        导入 .txt
+      </button>
+      <input type="file" id="fileInput" accept=".txt,.text,.md,text/plain" hidden />
+      <button class="btn" id="btnPaste" type="button">粘贴文本</button>
+      <button class="btn" id="btnSample" type="button">换示例文章</button>
+      <button class="btn panel-open-btn" id="btnToolbarPlay" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+        朗读全文
+      </button>
+      <span class="doc-title" id="docTitle"></span>
+      <div class="theme-picker" role="group" aria-label="选择主题背景">
+        <span class="theme-label">背景</span>
+        <button class="theme-btn" type="button" data-set-theme="paper" aria-pressed="false">纸书</button>
+        <button class="theme-btn" type="button" data-set-theme="snow" aria-pressed="false">纯白</button>
+        <button class="theme-btn" type="button" data-set-theme="eye" aria-pressed="false">护眼绿</button>
+        <button class="theme-btn" type="button" data-set-theme="ocean" aria-pressed="false">海盐蓝</button>
+        <button class="theme-btn" type="button" data-set-theme="night" aria-pressed="false">夜读</button>
+      </div>
+      <span class="stats" id="docStats"></span>
+    </div>
+
+    <div class="layout">
+      <main>
+        <div class="reader-card" id="readerCard">
+          <article id="reader" aria-label="文章正文"></article>
+        </div>
+      </main>
+
+      <aside class="panel" id="panel">
+        <button class="panel-close" id="panelClose" type="button" aria-label="关闭面板">✕</button>
+
+        <section class="card" aria-label="单词查询">
+          <h2>单词查询</h2>
+          <div id="wordBody">
+            <p class="word-hint">点正文里的任意单词，这里会显示音标、英文释义、例句，还有同义词和反义词。例句右侧的喇叭可以朗读例句。每段正文下方有一组按钮：「朗读本段」只读这一段，「翻译本段」点开才看中文译文，不点不会翻译。开始朗读后，网页底部会出现播放器，可以暂停、停止、调语速和换声音；不朗读时播放器不显示。</p>
+          </div>
+        </section>
+
+        <section class="card" aria-label="生词本">
+          <h2>生词本（<span id="vocabCount">0</span>）</h2>
+          <ul class="vocab-list" id="vocabList"></ul>
+          <p class="vocab-empty" id="vocabEmpty">查词时点「加入生词本」，词会攒在这里。</p>
+          <div class="vocab-actions">
+            <button class="btn" id="btnExport" type="button">导出 .txt</button>
+            <button class="btn" id="btnClearVocab" type="button">清空</button>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <div class="player-bar" id="playerBar" aria-label="语音播放器" aria-hidden="true">
+      <div class="player-inner">
+        <div class="playbar" role="group" aria-label="朗读控制">
+          <div class="transport">
+            <button class="pbtn main" id="btnPlay" type="button" aria-label="朗读 / 暂停">
+              <svg id="icoPlay" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+              <svg id="icoPause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="5" y="4" width="4.5" height="16" rx="1"/><rect x="14.5" y="4" width="4.5" height="16" rx="1"/></svg>
+            </button>
+            <button class="pbtn" id="btnStop" type="button" aria-label="停止朗读">
+              <svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+            </button>
+            <button class="pbtn" id="btnFromHere" type="button" aria-label="从选中的句子开始朗读" title="从选中的句子开始朗读">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/><line x1="21" y1="5" x2="21" y2="19"/></svg>
+            </button>
+          </div>
+          <span class="player-status" id="playerStatus">准备朗读</span>
+          <label class="rate-label">语速
+            <input type="range" id="rate" min="0.6" max="1.4" step="0.1" value="0.9" />
+            <span class="rate-val" id="rateVal">0.9×</span>
+          </label>
+          <label class="voice-label">声音
+            <select id="voiceSel" aria-label="选择朗读声音"></select>
+          </label>
+          <div class="font-row">字号
+            <span class="fontsize">
+              <button type="button" id="fontMinus" aria-label="减小字号">A−</button>
+              <button type="button" id="fontPlus" aria-label="增大字号">A＋</button>
+            </span>
+          </div>
+          <button class="player-close" id="btnClosePlayer" type="button" aria-label="关闭播放器">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="pasteOverlay" role="dialog" aria-modal="true" aria-labelledby="pasteTitle">
+      <div class="sheet">
+        <h3 id="pasteTitle">粘贴英文文本</h3>
+        <p>把文章、小说片段或任何英文段落粘进来，网站会自动拆成段落、句子和单词。</p>
+        <textarea id="pasteText" placeholder="Paste your English text here…"></textarea>
+        <div class="row">
+          <button class="btn" id="btnPasteCancel" type="button">取消</button>
+          <button class="btn primary" id="btnPasteGo" type="button">开始学习</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script>
+    (function () {
+      'use strict';
+
+      var SAMPLES = [
+        {
+          title: 'Alice\'s Adventures in Wonderland（节选）· Lewis Carroll',
+          text: [
+            'Alice was beginning to get very tired of sitting by her sister on the bank, and of having nothing to do: once or twice she had peeped into the book her sister was reading, but it had no pictures or conversations in it, \u201cand what is the use of a book,\u201d thought Alice, \u201cwithout pictures or conversations?\u201d',
+            'So she was considering in her own mind (as well as she could, for the hot day made her feel very sleepy and stupid), whether the pleasure of making a daisy-chain would be worth the trouble of getting up and picking the daisies, when suddenly a White Rabbit with pink eyes ran close by her.',
+            'There was nothing so very remarkable in that; nor did Alice think it so very much out of the way to hear the Rabbit say to itself, \u201cOh dear! Oh dear! I shall be late!\u201d But when the Rabbit actually took a watch out of its waistcoat-pocket, and looked at it, and then hurried on, Alice started to her feet, for it flashed across her mind that she had never before seen a rabbit with either a waistcoat-pocket, or a watch to take out of it, and burning with curiosity, she ran across the field after it, and fortunately was just in time to see it pop down a large rabbit-hole under the hedge.',
+            'In another moment down went Alice after it, never once considering how in the world she was to get out again.'
+          ].join('\n\n')
+        },
+        {
+          title: 'The Little Prince（节选）· Antoine de Saint-Exup\u00e9ry',
+          text: [
+            'Once when I was six years old I saw a magnificent picture in a book, called True Stories from Nature, about the primeval forest. It was a picture of a boa constrictor in the act of swallowing an animal. In the book it said: \u201cBoa constrictors swallow their prey whole, without chewing it. After that they are not able to move, and they sleep through the six months that they need for digestion.\u201d',
+            'I pondered deeply, then, over the adventures of the jungle. And after some work with a colored pencil I succeeded in making my first drawing. I showed my masterpiece to the grown-ups, and asked them whether the drawing frightened them. But they answered: \u201cFrighten? Why should any one be frightened by a hat?\u201d',
+            'My drawing was not a picture of a hat. It was a picture of a boa constrictor digesting an elephant. But since the grown-ups were not able to understand it, I made another drawing. I drew the inside of a boa constrictor, so that the grown-ups could see it clearly. They always need to have things explained.'
+          ].join('\n\n')
+        }
+      ];
+
+      var ABBREV = ['Mr', 'Mrs', 'Ms', 'Dr', 'St', 'Jr', 'Sr', 'Prof', 'Capt', 'Lt', 'Col', 'Gen', 'vs', 'etc', 'e.g', 'i.e', 'U.S', 'U.K', 'a.m', 'p.m', 'No', 'Fig', 'approx'];
+
+      var state = {
+        sentences: [],        // {text, el}
+        paragraphs: [],       // {text, transEl, btnEl, translation, loading}
+        selSent: -1,
+        selWordEl: null,
+        currentWord: '',
+        currentGloss: '',
+        playing: false,
+        paused: false,
+        playIdx: 0,
+        playLimit: -1,
+        activePara: -1,
+        rate: 0.9,
+        voice: null,
+        vocab: [],            // {word, gloss}
+        sampleIdx: 0,
+        readerSize: 1.16,
+        lookupSeq: 0
+      };
+
+      var $ = function (id) { return document.getElementById(id); };
+      var readerEl = $('reader'), wordBody = $('wordBody');
+
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+
+      var toastTimer = null;
+      function toast(msg) {
+        var t = $('toast'); t.textContent = msg; t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2600);
+      }
+
+      /* ---------------- text splitting ---------------- */
+
+      function splitParagraphs(raw) {
+        var text = raw.replace(/\r\n?/g, '\n').trim();
+        if (!text) return [];
+        var parts;
+        if (/\n\s*\n/.test(text)) {
+          parts = text.split(/\n\s*\n/);
+        } else {
+          parts = text.split(/\n/);
+        }
+        return parts.map(function (p) { return p.replace(/\s*\n\s*/g, ' ').replace(/[ \t]+/g, ' ').trim(); })
+                    .filter(function (p) { return p.length > 0; });
+      }
+
+      function splitSentences(para) {
+        var guarded = para;
+        ABBREV.forEach(function (a) {
+          var re = new RegExp(a.replace(/\./g, '\\.') + '\\.', 'g');
+          guarded = guarded.replace(re, a.replace(/\./g, '\u0001') + '\u0001');
+        });
+        guarded = guarded.replace(/(\d)\.(\d)/g, '$1\u0001$2');
+        var out = [];
+        var re = /[^.!?…]+(?:[.!?…]+["\u201d\u2019)\]]*|$)/g;
+        var m;
+        while ((m = re.exec(guarded)) !== null) {
+          var s = m[0].replace(/\u0001/g, '.').trim();
+          if (s) out.push(s);
+        }
+        if (!out.length && para.trim()) out.push(para.trim());
+        return out;
+      }
+
+      var WORD_RE = /[A-Za-z]+(?:['\u2019\-][A-Za-z]+)*/g;
+
+      function buildSentence(text, idx) {
+        var span = document.createElement('span');
+        span.className = 'sent';
+        span.dataset.idx = idx;
+        var last = 0, m;
+        WORD_RE.lastIndex = 0;
+        while ((m = WORD_RE.exec(text)) !== null) {
+          if (m.index > last) span.appendChild(document.createTextNode(text.slice(last, m.index)));
+          var w = document.createElement('span');
+          w.className = 'w';
+          w.textContent = m[0];
+          w.dataset.word = m[0];
+          w.dataset.sent = idx;
+          span.appendChild(w);
+          last = m.index + m[0].length;
+        }
+        if (last < text.length) span.appendChild(document.createTextNode(text.slice(last)));
+        span.appendChild(document.createTextNode(' '));
+        return span;
+      }
+
+      /* ---------------- paragraph translation ---------------- */
+
+      function fetchTranslationChunk(text) {
+        var url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text) + '&langpair=en|zh-CN';
+        return fetchJSON(url).then(function (d) {
+          var t = d && d.responseData && d.responseData.translatedText;
+          if (!t) throw new Error('empty');
+          // MyMemory returns the source text uppercased-ish on quota errors; treat quota message as failure
+          if (/MYMEMORY WARNING|QUERY LENGTH LIMIT|INVALID EMAIL|NO QUERY SPECIFIED/i.test(t)) throw new Error('quota');
+          return t.trim();
+        });
+      }
+
+      function translateParagraphText(paraText) {
+        // MyMemory caps q at ~500 chars: translate sentence by sentence when needed
+        if (paraText.length <= 420) return fetchTranslationChunk(paraText);
+        var sents = splitSentences(paraText);
+        // Further split any single over-long sentence into <=420-char pieces on commas/spaces
+        var chunks = [];
+        sents.forEach(function (s) {
+          if (s.length <= 420) { chunks.push(s); return; }
+          var rest = s;
+          while (rest.length > 420) {
+            var cut = rest.lastIndexOf(' ', 420);
+            if (cut < 120) cut = 420;
+            chunks.push(rest.slice(0, cut).trim());
+            rest = rest.slice(cut).trim();
+          }
+          if (rest) chunks.push(rest);
+        });
+        var results = [];
+        var chain = Promise.resolve();
+        chunks.forEach(function (c) {
+          chain = chain.then(function () {
+            return fetchTranslationChunk(c).then(function (t) { results.push(t); });
+          });
+        });
+        return chain.then(function () { return results.join(''); });
+      }
+
+      function onTranslateClick(para) {
+        var transEl = para.transEl, btn = para.btnEl;
+        var bodyEl = transEl.querySelector('.pt-body');
+        var isShown = transEl.classList.contains('show');
+        // Already translated: just toggle visibility, no re-fetch
+        if (para.translation) {
+          if (isShown) {
+            transEl.classList.remove('show');
+            btn.setAttribute('aria-expanded', 'false');
+            btn.querySelector('.pt-btn-label').textContent = '显示译文';
+          } else {
+            transEl.classList.add('show');
+            btn.setAttribute('aria-expanded', 'true');
+            btn.querySelector('.pt-btn-label').textContent = '隐藏译文';
+          }
+          return;
+        }
+        if (para.loading) return;
+        para.loading = true;
+        btn.disabled = true;
+        btn.querySelector('.pt-btn-label').textContent = '翻译中…';
+        transEl.classList.add('show');
+        bodyEl.innerHTML = '<span class="pt-error">正在翻译本段…</span>';
+        translateParagraphText(para.text).then(function (zh) {
+          para.translation = zh;
+          para.loading = false;
+          btn.disabled = false;
+          btn.setAttribute('aria-expanded', 'true');
+          btn.querySelector('.pt-btn-label').textContent = '隐藏译文';
+          bodyEl.textContent = zh;
+        }).catch(function () {
+          para.loading = false;
+          btn.disabled = false;
+          btn.setAttribute('aria-expanded', 'true');
+          btn.querySelector('.pt-btn-label').textContent = '重试翻译';
+          bodyEl.innerHTML = '<span class="pt-error">翻译没成功，可能是网络问题或免费额度暂时用完。点「重试翻译」再试一次。</span>';
+        });
+      }
+
+      function loadText(raw, title) {
+        stopSpeak();
+        state.sentences = [];
+        state.paragraphs = [];
+        state.selSent = -1;
+        state.selWordEl = null;
+        readerEl.innerHTML = '';
+        var paras = splitParagraphs(raw);
+        var wordCount = 0;
+        paras.forEach(function (p) {
+          var block = document.createElement('div');
+          block.className = 'para-block';
+          var pEl = document.createElement('p');
+          var sentStart = state.sentences.length;
+          splitSentences(p).forEach(function (s) {
+            var idx = state.sentences.length;
+            var el = buildSentence(s, idx);
+            pEl.appendChild(el);
+            state.sentences.push({ text: s, el: el });
+            var wm = s.match(/[A-Za-z]+(?:['\u2019\-][A-Za-z]+)*/g);
+            if (wm) wordCount += wm.length;
+          });
+          block.appendChild(pEl);
+
+          var tools = document.createElement('div');
+          tools.className = 'para-tools';
+          var actions = document.createElement('div');
+          actions.className = 'para-actions';
+          actions.setAttribute('role', 'group');
+          actions.setAttribute('aria-label', '本段操作：朗读与翻译');
+          var playBtn = document.createElement('button');
+          playBtn.type = 'button';
+          playBtn.className = 'para-action-btn para-play-btn';
+          playBtn.setAttribute('aria-pressed', 'false');
+          playBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg><span class="pp-btn-label">朗读本段</span>';
+          actions.appendChild(playBtn);
+          var tBtn = document.createElement('button');
+          tBtn.type = 'button';
+          tBtn.className = 'para-action-btn para-translate-btn';
+          tBtn.setAttribute('aria-expanded', 'false');
+          tBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h9"/><path d="M8.5 3v2c0 3.5-2 6.5-4.5 8.5"/><path d="M5.5 8c1 2.5 3.5 5 6 6"/><path d="M12.5 21l4.5-10 4.5 10"/><path d="M14.2 17.5h5.6"/></svg><span class="pt-btn-label">翻译本段</span>';
+          actions.appendChild(tBtn);
+          tools.appendChild(actions);
+          block.appendChild(tools);
+
+          var transEl = document.createElement('div');
+          transEl.className = 'para-translation';
+          transEl.setAttribute('aria-live', 'polite');
+          transEl.innerHTML = '<span class="pt-label">本段译文 · 中文</span><span class="pt-body"></span>';
+          block.appendChild(transEl);
+
+          var paraObj = {
+            text: p, index: state.paragraphs.length,
+            sentStart: sentStart, sentEnd: state.sentences.length - 1,
+            transEl: transEl, btnEl: tBtn, playBtnEl: playBtn,
+            translation: '', loading: false
+          };
+          state.paragraphs.push(paraObj);
+          tBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            onTranslateClick(paraObj);
+          });
+          playBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            onParaPlayClick(paraObj);
+          });
+
+          readerEl.appendChild(block);
+        });
+        $('docTitle').textContent = title || '';
+        $('docTitle').title = title || '';
+        $('docStats').textContent = '共 ' + wordCount + ' 词 · ' + state.sentences.length + ' 句 · ' + paras.length + ' 段';
+        if (!state.sentences.length) {
+          readerEl.innerHTML = '<p class="empty-note">没有读到文本，换一份试试。</p>';
+        }
+        window.scrollTo({ top: 0 });
+      }
+
+      /* ---------------- selection ---------------- */
+
+      function selectSentence(idx, scroll) {
+        state.sentences.forEach(function (s, i) {
+          s.el.classList.toggle('sel', i === idx);
+        });
+        state.selSent = idx;
+        if (scroll && idx >= 0 && state.sentences[idx]) {
+          state.sentences[idx].el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+      }
+
+      function selectWord(el) {
+        if (state.selWordEl) state.selWordEl.classList.remove('sel');
+        state.selWordEl = el;
+        if (el) el.classList.add('sel');
+      }
+
+      readerEl.addEventListener('click', function (e) {
+        var w = e.target.closest ? e.target.closest('.w') : null;
+        var sentEl = e.target.closest ? e.target.closest('.sent') : null;
+        if (sentEl) selectSentence(parseInt(sentEl.dataset.idx, 10), false);
+        if (w) {
+          selectWord(w);
+          lookupWord(w.dataset.word);
+          if (window.innerWidth <= 940) document.body.classList.add('panel-open');
+        }
+      });
+
+      /* ---------------- speech ---------------- */
+
+      var synth = window.speechSynthesis || null;
+
+      function loadVoices() {
+        if (!synth) return;
+        var voices = synth.getVoices().filter(function (v) { return /^en([-_]|$)/i.test(v.lang); });
+        var sel = $('voiceSel');
+        var prev = sel.value;
+        sel.innerHTML = '';
+        voices.forEach(function (v, i) {
+          var o = document.createElement('option');
+          o.value = i;
+          o.textContent = v.name.replace(/Microsoft |Google /, '') + ' (' + v.lang + ')';
+          sel.appendChild(o);
+        });
+        if (!voices.length) {
+          var o = document.createElement('option');
+          o.textContent = '系统默认英语声音';
+          sel.appendChild(o);
+        }
+        sel._voices = voices;
+        var keep = prev !== '' && voices[parseInt(prev, 10)] ? parseInt(prev, 10) : 0;
+        sel.value = keep;
+        state.voice = voices[keep] || null;
+      }
+      if (synth) {
+        loadVoices();
+        if (typeof synth.onvoiceschanged !== 'undefined') synth.onvoiceschanged = loadVoices;
+      }
+      $('voiceSel').addEventListener('change', function () {
+        var voices = this._voices || [];
+        state.voice = voices[parseInt(this.value, 10)] || null;
+      });
+      $('rate').addEventListener('input', function () {
+        state.rate = parseFloat(this.value);
+        $('rateVal').textContent = state.rate.toFixed(1) + '\u00d7';
+      });
+
+      function makeUtterance(text) {
+        var u = new SpeechSynthesisUtterance(text);
+        u.rate = state.rate;
+        if (state.voice) { u.voice = state.voice; u.lang = state.voice.lang; }
+        else u.lang = 'en-US';
+        return u;
+      }
+
+      function setPlayIcon() {
+        $('icoPlay').style.display = (state.playing && !state.paused) ? 'none' : '';
+        $('icoPause').style.display = (state.playing && !state.paused) ? '' : 'none';
+      }
+
+      /* Player bar lives at the bottom of the page and only appears after a play click */
+      function showPlayer() {
+        var bar = $('playerBar');
+        if (!bar) return;
+        bar.classList.add('show');
+        bar.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('player-visible');
+      }
+      function hidePlayer() {
+        var bar = $('playerBar');
+        if (!bar) return;
+        bar.classList.remove('show');
+        bar.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('player-visible');
+      }
+      function updatePlayerStatus() {
+        var el = $('playerStatus');
+        if (!el) return;
+        if (!state.playing) { el.textContent = '准备朗读'; return; }
+        var total = state.sentences.length;
+        var cur = Math.min(state.playIdx + 1, total);
+        var txt = state.activePara >= 0
+          ? '第 ' + (state.activePara + 1) + ' 段 · 第 ' + cur + ' / ' + total + ' 句'
+          : '第 ' + cur + ' / ' + total + ' 句';
+        el.textContent = (state.paused ? '已暂停 · ' : '正在朗读 · ') + txt;
+      }
+
+      function markActive(idx) {
+        state.sentences.forEach(function (s, i) {
+          s.el.classList.toggle('active', i === idx);
+        });
+        updatePlayerStatus();
+        if (idx >= 0 && state.sentences[idx]) {
+          var r = state.sentences[idx].el.getBoundingClientRect();
+          if (r.top < 120 || r.bottom > window.innerHeight - 40) {
+            state.sentences[idx].el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          }
+        }
+      }
+
+      function speakCurrent() {
+        if (!state.playing) return;
+        if (state.playIdx >= state.sentences.length) { stopSpeak(); return; }
+        if (state.playLimit >= 0 && state.playIdx > state.playLimit) { stopSpeak(); return; }
+        markActive(state.playIdx);
+        var u = makeUtterance(state.sentences[state.playIdx].text);
+        u.onend = function () {
+          if (!state.playing || state.paused) return;
+          state.playIdx++;
+          speakCurrent();
+        };
+        u.onerror = function (ev) {
+          if (ev.error === 'interrupted' || ev.error === 'canceled') return;
+          if (!state.playing) return;
+          state.playIdx++;
+          speakCurrent();
+        };
+        synth.speak(u);
+      }
+
+      function refreshParaButtons() {
+        state.paragraphs.forEach(function (p) {
+          if (!p.playBtnEl) return;
+          var label = p.playBtnEl.querySelector('.pp-btn-label');
+          var active = state.playing && state.activePara === p.index;
+          if (label) {
+            label.textContent = active ? (state.paused ? '继续朗读' : '暂停') : '朗读本段';
+          }
+          p.playBtnEl.classList.toggle('is-playing', active);
+          p.playBtnEl.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+      }
+
+      function playParagraph(para) {
+        state.activePara = para.index;
+        playFrom(para.sentStart, para.sentEnd);
+      }
+
+      function onParaPlayClick(para) {
+        if (!synth) { toast('这个浏览器不支持语音朗读，换 Chrome 或 Edge 试试'); return; }
+        if (state.playing && state.activePara === para.index) {
+          if (state.paused) {
+            synth.resume();
+            state.paused = false;
+          } else {
+            synth.pause();
+            state.paused = true;
+          }
+          setPlayIcon();
+          refreshParaButtons();
+          updatePlayerStatus();
+          return;
+        }
+        playParagraph(para);
+      }
+
+      function playFrom(idx, limit) {
+        if (!synth) { toast('这个浏览器不支持语音朗读，换 Chrome 或 Edge 试试'); return; }
+        if (!state.sentences.length) { toast('先导入一篇文章'); return; }
+        synth.cancel();
+        state.playing = true;
+        state.paused = false;
+        state.playIdx = Math.max(0, idx);
+        state.playLimit = (typeof limit === 'number') ? limit : -1;
+        if (typeof limit !== 'number') state.activePara = -1;
+        setPlayIcon();
+        refreshParaButtons();
+        showPlayer();
+        updatePlayerStatus();
+        /* On phones the sidebar is a bottom sheet: close it so the highlighted sentence stays visible */
+        if (window.innerWidth <= 940) document.body.classList.remove('panel-open');
+        speakCurrent();
+      }
+
+      function stopSpeak() {
+        if (synth) synth.cancel();
+        state.playing = false;
+        state.paused = false;
+        state.playLimit = -1;
+        state.activePara = -1;
+        markActive(-1);
+        setPlayIcon();
+        refreshParaButtons();
+        hidePlayer();
+      }
+
+      $('btnPlay').addEventListener('click', function () {
+        if (!synth) { toast('这个浏览器不支持语音朗读，换 Chrome 或 Edge 试试'); return; }
+        if (state.playing && !state.paused) {
+          synth.pause();
+          state.paused = true;
+          setPlayIcon();
+          refreshParaButtons();
+          updatePlayerStatus();
+        } else if (state.playing && state.paused) {
+          synth.resume();
+          state.paused = false;
+          setPlayIcon();
+          refreshParaButtons();
+          updatePlayerStatus();
+        } else {
+          playFrom(state.selSent >= 0 ? state.selSent : 0);
+        }
+      });
+      $('btnStop').addEventListener('click', stopSpeak);
+      $('btnClosePlayer').addEventListener('click', stopSpeak);
+      $('btnFromHere').addEventListener('click', function () {
+        playFrom(state.selSent >= 0 ? state.selSent : 0);
+      });
+
+      function speakText(text) {
+        if (!synth) { toast('这个浏览器不支持语音朗读'); return; }
+        stopSpeak();
+        synth.speak(makeUtterance(text));
+      }
+
+      /* ---------------- dictionary lookup ---------------- */
+
+      function fetchJSON(url) {
+        return fetch(url).then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        });
+      }
+
+      function lookupWord(rawWord) {
+        var word = rawWord.toLowerCase().replace(/^[^a-z]+|[^a-z]+$/g, '');
+        if (!word) return;
+        state.currentWord = word;
+        state.currentGloss = '';
+        var seq = ++state.lookupSeq;
+        wordBody.innerHTML =
+          '<div class="word-head"><span class="word">' + esc(word) + '</span></div>' +
+          '<p class="loading">正在查词典\u2026</p>';
+
+        var dictP = fetchJSON('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(word))
+          .then(function (d) { return Array.isArray(d) ? d[0] : null; })
+          .catch(function () { return null; });
+        var synP = fetchJSON('https://api.datamuse.com/words?rel_syn=' + encodeURIComponent(word) + '&max=14')
+          .then(function (d) { return d.map(function (x) { return x.word; }); })
+          .catch(function () { return []; });
+        var antP = fetchJSON('https://api.datamuse.com/words?rel_ant=' + encodeURIComponent(word) + '&max=14')
+          .then(function (d) { return d.map(function (x) { return x.word; }); })
+          .catch(function () { return []; });
+        Promise.all([dictP, synP, antP]).then(function (res) {
+          if (seq !== state.lookupSeq) return;
+          renderWord(word, res[0], res[1], res[2]);
+        });
+      }
+
+      function chipsHTML(list) {
+        return list.map(function (w) {
+          return '<button type="button" class="chip" data-chip="' + esc(w) + '">' + esc(w) + '</button>';
+        }).join('');
+      }
+
+      function renderWord(word, entry, syns, ants) {
+        var html = '';
+        var phonetic = '', audioUrl = '';
+        if (entry) {
+          phonetic = entry.phonetic || '';
+          (entry.phonetics || []).forEach(function (p) {
+            if (!phonetic && p.text) phonetic = p.text;
+            if (!audioUrl && p.audio) audioUrl = p.audio;
+          });
+        }
+        html += '<div class="word-head"><span class="word">' + esc(word) + '</span>' +
+          (phonetic ? '<span class="phonetic">' + esc(phonetic) + '</span>' : '') +
+          '<button type="button" class="speak-btn" id="btnSpeakWord" aria-label="朗读单词">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>' +
+          '</button></div>';
+
+        var defSyns = [], defAnts = [];
+        var examples = [];
+        if (entry && entry.meanings) {
+          entry.meanings.forEach(function (m) {
+            (m.synonyms || []).forEach(function (s) { if (defSyns.indexOf(s) < 0) defSyns.push(s); });
+            (m.antonyms || []).forEach(function (s) { if (defAnts.indexOf(s) < 0) defAnts.push(s); });
+            (m.definitions || []).forEach(function (d) {
+              (d.synonyms || []).forEach(function (s) { if (defSyns.indexOf(s) < 0) defSyns.push(s); });
+              (d.antonyms || []).forEach(function (s) { if (defAnts.indexOf(s) < 0) defAnts.push(s); });
+            });
+          });
+          entry.meanings.forEach(function (m) {
+            html += '<div class="pos">' + esc(m.partOfSpeech || '') + '</div>';
+            (m.definitions || []).slice(0, 3).forEach(function (d, i) {
+              html += '<p class="def"><span class="num">' + (i + 1) + '.</span>' + esc(d.definition) + '</p>';
+              if (d.example) {
+                var exIdx = examples.length;
+                examples.push(d.example);
+                html += '<div class="example-row"><p class="example">\u201c' + esc(d.example) + '\u201d</p>' +
+                  '<button type="button" class="example-speak" data-ex="' + exIdx + '" aria-label="朗读例句" title="朗读例句">' +
+                  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>' +
+                  '</button></div>';
+              }
+            });
+          });
+        }
+        if (!entry) {
+          html += '<p class="notfound">词典里没查到这个词，可能是专有名词或拼写变体。下面是同义词 / 反义词的参考结果。</p>';
+        }
+
+        var allSyns = defSyns.slice();
+        syns.forEach(function (s) { if (allSyns.indexOf(s) < 0) allSyns.push(s); });
+        var allAnts = defAnts.slice();
+        ants.forEach(function (s) { if (allAnts.indexOf(s) < 0) allAnts.push(s); });
+        allSyns = allSyns.slice(0, 14);
+        allAnts = allAnts.slice(0, 14);
+
+        if (allSyns.length) html += '<div class="rel-title">同义词 SYNONYMS</div><div class="chips">' + chipsHTML(allSyns) + '</div>';
+        if (allAnts.length) html += '<div class="rel-title">反义词 ANTONYMS</div><div class="chips">' + chipsHTML(allAnts) + '</div>';
+        if (!allSyns.length && !allAnts.length && entry) {
+          html += '<p class="notfound" style="margin-top:.7rem">这个词暂时没查到同义词 / 反义词。</p>';
+        }
+
+        html += '<div class="panel-actions">' +
+          '<button type="button" class="btn" id="btnAddVocab">＋ 加入生词本</button>' +
+          '<button type="button" class="btn" id="btnReadSent">朗读本句</button>' +
+          '</div>';
+
+        wordBody.innerHTML = html;
+
+        $('btnSpeakWord').addEventListener('click', function () {
+          if (audioUrl) {
+            var a = new Audio(audioUrl);
+            a.play().catch(function () { speakText(word); });
+          } else {
+            speakText(word);
+          }
+        });
+        wordBody.querySelectorAll('.example-speak').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var ex = examples[parseInt(btn.dataset.ex, 10)];
+            if (ex) speakText(ex);
+          });
+        });
+        $('btnAddVocab').addEventListener('click', function () { addVocab(word); });
+        $('btnReadSent').addEventListener('click', function () {
+          if (state.selSent >= 0) playFrom(state.selSent);
+          else toast('先在正文里点一下要读的句子');
+        });
+
+        wordBody.querySelectorAll('.chip').forEach(function (chip) {
+          chip.addEventListener('click', function () {
+            var w = chip.dataset.chip;
+            document.querySelectorAll('#reader .w').forEach(function (el) {
+              if (el.dataset.word.toLowerCase() === w.toLowerCase()) selectWord(el);
+            });
+            lookupWord(w);
+          });
+        });
+      }
+
+      /* ---------------- vocab ---------------- */
+
+      function addVocab(word) {
+        var exists = state.vocab.some(function (v) { return v.word === word; });
+        if (exists) { toast('\u201c' + word + '\u201d 已经在生词本里了'); return; }
+        state.vocab.push({ word: word, gloss: state.currentGloss || '' });
+        renderVocab();
+        toast('已加入生词本：' + word);
+      }
+
+      function renderVocab() {
+        var list = $('vocabList');
+        list.innerHTML = '';
+        $('vocabCount').textContent = state.vocab.length;
+        $('vocabEmpty').style.display = state.vocab.length ? 'none' : '';
+        state.vocab.forEach(function (v, i) {
+          var li = document.createElement('li');
+          var w = document.createElement('span'); w.className = 'vw'; w.textContent = v.word;
+          var g = document.createElement('span'); g.className = 'vg'; g.textContent = v.gloss || '';
+          var x = document.createElement('button');
+          x.className = 'vx'; x.type = 'button'; x.textContent = '\u00d7'; x.setAttribute('aria-label', '删除 ' + v.word);
+          x.addEventListener('click', function (e) {
+            e.stopPropagation();
+            state.vocab.splice(i, 1);
+            renderVocab();
+          });
+          li.appendChild(w); li.appendChild(g); li.appendChild(x);
+          li.addEventListener('click', function () {
+            lookupWord(v.word);
+            if (window.innerWidth <= 940) document.body.classList.add('panel-open');
+          });
+          list.appendChild(li);
+        });
+      }
+
+      $('btnClearVocab').addEventListener('click', function () {
+        state.vocab = [];
+        renderVocab();
+      });
+      $('btnExport').addEventListener('click', function () {
+        if (!state.vocab.length) { toast('生词本还是空的'); return; }
+        var lines = state.vocab.map(function (v) { return v.gloss ? v.word + ' \u2014 ' + v.gloss : v.word; });
+        var blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = '生词本.txt';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+      });
+
+      /* ---------------- import ---------------- */
+
+      $('btnFile').addEventListener('click', function () { $('fileInput').click(); });
+      $('fileInput').addEventListener('change', function () {
+        var f = this.files && this.files[0];
+        if (!f) return;
+        f.text().then(function (t) {
+          loadText(t, f.name);
+          toast('已导入：' + f.name);
+        }).catch(function () { toast('文件读取失败，换个文件试试'); });
+        this.value = '';
+      });
+
+      var overlay = $('pasteOverlay');
+      $('btnPaste').addEventListener('click', function () {
+        overlay.classList.add('open');
+        setTimeout(function () { $('pasteText').focus(); }, 50);
+      });
+      $('btnPasteCancel').addEventListener('click', function () { overlay.classList.remove('open'); });
+      overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.classList.remove('open'); });
+      $('btnPasteGo').addEventListener('click', function () {
+        var t = $('pasteText').value.trim();
+        if (!t) { toast('先粘贴一点英文文本'); return; }
+        overlay.classList.remove('open');
+        loadText(t, '粘贴的文本');
+        toast('已拆分，可以开始学了');
+      });
+
+      var card = $('readerCard');
+      ['dragenter', 'dragover'].forEach(function (ev) {
+        card.addEventListener(ev, function (e) { e.preventDefault(); card.classList.add('dragover'); });
+      });
+      ['dragleave', 'drop'].forEach(function (ev) {
+        card.addEventListener(ev, function (e) { e.preventDefault(); card.classList.remove('dragover'); });
+      });
+      card.addEventListener('drop', function (e) {
+        var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if (f) {
+          f.text().then(function (t) { loadText(t, f.name); toast('已导入：' + f.name); })
+                .catch(function () { toast('文件读取失败'); });
+        }
+      });
+
+      $('btnSample').addEventListener('click', function () {
+        state.sampleIdx = (state.sampleIdx + 1) % SAMPLES.length;
+        var s = SAMPLES[state.sampleIdx];
+        loadText(s.text, s.title);
+        toast('已换成示例：' + s.title.split('\u00b7')[0]);
+      });
+
+      /* ---------------- misc UI ---------------- */
+
+      $('panelClose').addEventListener('click', function () {
+        document.body.classList.remove('panel-open');
+      });
+      $('btnToolbarPlay').addEventListener('click', function () {
+        if (state.playing) { showPlayer(); return; }
+        playFrom(state.selSent >= 0 ? state.selSent : 0);
+      });
+      $('fontPlus').addEventListener('click', function () {
+        state.readerSize = Math.min(1.5, +(state.readerSize + 0.08).toFixed(2));
+        document.documentElement.style.setProperty('--reader-size', state.readerSize + 'rem');
+      });
+      $('fontMinus').addEventListener('click', function () {
+        state.readerSize = Math.max(0.92, +(state.readerSize - 0.08).toFixed(2));
+        document.documentElement.style.setProperty('--reader-size', state.readerSize + 'rem');
+      });
+
+      /* ---------------- themes ---------------- */
+
+      var THEME_NAMES = { paper: '纸书', snow: '纯白', eye: '护眼绿', ocean: '海盐蓝', night: '夜读' };
+
+      function applyTheme(name, announce) {
+        if (!THEME_NAMES[name]) name = 'paper';
+        document.documentElement.setAttribute('data-theme', name);
+        document.documentElement.style.colorScheme = name === 'night' ? 'dark' : 'light';
+        document.querySelectorAll('.theme-btn').forEach(function (b) {
+          var on = b.dataset.setTheme === name;
+          b.classList.toggle('is-active', on);
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+        if (announce) toast('已切换主题：' + THEME_NAMES[name]);
+      }
+
+      document.querySelectorAll('.theme-btn').forEach(function (b) {
+        b.addEventListener('click', function () { applyTheme(b.dataset.setTheme, true); });
+      });
+
+      /* Keep the sticky sidebar clear of the toolbar, whose height grows when the theme picker wraps */
+      var toolbarEl = document.querySelector('.toolbar');
+      var panelEl = $('panel');
+      function syncBarTops() {
+        if (!toolbarEl) return;
+        var h = toolbarEl.offsetHeight;
+        if (panelEl) panelEl.style.top = window.innerWidth > 940 ? (h + 13) + 'px' : '';
+      }
+      window.addEventListener('resize', syncBarTops);
+
+      /* ---------------- init ---------------- */
+      applyTheme(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'paper', false);
+      syncBarTops();
+      loadText(SAMPLES[0].text, SAMPLES[0].title);
+      renderVocab();
+    })();
+    </script>
+  </body>
+</html>
