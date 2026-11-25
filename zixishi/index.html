@@ -138,11 +138,11 @@
       /* ---------- toolbar ---------- */
       .toolbar {
         position: sticky; top: 0; z-index: 30;
-        display: flex; flex-wrap: wrap; align-items: center; gap: .85rem .6rem;
+        display: flex; flex-wrap: wrap; align-items: center; gap: 1rem .6rem;
         /* 左右留白随窗口变宽而变大，让标题、中间按钮组、右上角色点正好落在
            正文栏（.layout，最大 1024px 居中）的两端之内，和文章板块两端对齐；
            窗口窄于正文栏时退回 .9rem，和原来一样。
-           上下留白和行距都比原来放大一档：标题行、导航行不再挤在一起 */
+           标题行与导航行之间只留 1rem（约 16px），标题行自身不再加底部留白 */
         padding: 1.05rem max(.9rem, calc((100% - 1024px) / 2 + .9rem)) .9rem;
         background: var(--paper);
         border-bottom: 1px solid var(--line);
@@ -158,8 +158,6 @@
       .toolbar .title-row {
         flex: 0 0 100%;
         display: flex; align-items: center; gap: .8rem;
-        padding-bottom: .8rem;
-        border-bottom: 1px solid var(--line);
       }
       .toolbar .brand {
         flex: 1 1 auto; min-width: 0;
@@ -201,10 +199,10 @@
       .doc-title { font-size: .83rem; color: var(--muted); max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
       /* ---------- layout ---------- */
-      /* 顶部留白加大：正文整个板块离导航栏远一点，不再贴着工具栏（原 1.1rem 太挤） */
+      /* 顶部留白再翻倍：标题与导航这一带和下方正文拉开到原来的两倍（2rem → 4rem） */
       .layout {
         max-width: 1024px; margin: 0 auto;
-        padding: 2rem .9rem 3rem;
+        padding: 4rem .9rem 3rem;
       }
 
       /* ---------- playback (bottom player, hidden until first play click) ----------
@@ -236,7 +234,7 @@
         appearance: none; flex: none; display: inline-flex; align-items: center; gap: .3rem;
         border: 1px solid var(--line); background: var(--paper); color: var(--ink);
         border-radius: 999px; padding: .35rem .8rem; min-height: 2.25rem;
-        font-size: .85rem; cursor: pointer;
+        font-size: .9rem; cursor: pointer;
       }
       .player-expand:hover { border-color: var(--accent); color: var(--accent); }
       .player-expand svg { width: 14px; height: 14px; flex: none; transition: transform .2s ease; }
@@ -275,11 +273,20 @@
       }
       .player-settings input[type="range"] { flex: 1; min-width: 4.5rem; accent-color: var(--accent); min-height: 2.25rem; }
       .player-settings .rate-val { font-variant-numeric: tabular-nums; min-width: 2.2em; }
-      .fontsize { display: inline-flex; gap: .25rem; }
+      /* 字号与语速统一为同一套胶囊按钮：和 .rate-quick 完全相同的规格——
+         整组一个胶囊形外框（border + 999px 圆角 + overflow hidden），
+         组内按钮无边框、等宽等高，中间用一条竖线分隔，不再是独立正方形 */
+      .fontsize { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
       .fontsize button {
-        border: 1px solid var(--line); background: var(--paper); color: var(--ink);
-        border-radius: 8px; padding: .3rem .55rem; cursor: pointer; font-size: .85rem;
+        appearance: none; border: none; background: var(--paper); color: var(--ink);
+        font-size: .9rem; cursor: pointer; line-height: 1.3;
+        /* 固定尺寸：与语速按钮同宽同高（3.5rem × 2.75rem），符号用 flex 居中；
+           不再由内容和内边距撑大小，桌面与手机形状完全一致，不会被压扁 */
+        width: 3.5rem; height: 2.75rem; padding: 0; flex: none;
+        display: inline-flex; align-items: center; justify-content: center;
       }
+      .fontsize button + button { border-left: 1px solid var(--line); }
+      .fontsize button:hover { color: var(--accent); }
 
       /* ---------- 播放器里的段落标记：第一段 / 第二段… ----------
          点段号跳到那一段开始读，走当前播放模式（循环按钮切换：
@@ -300,7 +307,7 @@
         appearance: none; flex: none; white-space: nowrap;
         border: 1px solid var(--line); background: var(--paper); color: var(--ink);
         border-radius: 999px; padding: .3rem .8rem; min-height: 2.25rem;
-        font-size: .85rem; cursor: pointer;
+        font-size: .9rem; cursor: pointer;
       }
       .para-chip:hover { border-color: var(--accent); color: var(--accent); }
       .para-chip.is-active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
@@ -410,7 +417,7 @@
       .chips { display: flex; flex-wrap: wrap; gap: .35rem; }
       .chip {
         background: var(--chip); border: 1px solid var(--line); border-radius: 999px;
-        padding: .28rem .7rem; font-size: .86rem; cursor: pointer; color: var(--ink);
+        padding: .28rem .7rem; font-size: .9rem; cursor: pointer; color: var(--ink);
         font-family: var(--font-serif);
       }
       .chip:hover { border-color: var(--accent); color: var(--accent); }
@@ -424,21 +431,20 @@
       .notfound { color: var(--muted); font-size: .92rem; font-family: var(--font-sans); }
       .word-hint { color: var(--muted); font-size: .93rem; margin: 0; font-family: var(--font-sans); }
 
-      /* ---------- view switch （文章 / 词表） ---------- */
+      /* ---------- view switch （首页 / 文章 / 词表） ----------
+         普通文字样式：没有按钮边框、没有按钮背景，选中项也不带底色，
+         只靠文字颜色（accent）和加粗标出当前板块，就是一行可点的文字 */
       .view-switch {
-        display: inline-flex; border: 1px solid var(--line); border-radius: 999px;
-        overflow: hidden; background: var(--paper); flex: none;
+        display: inline-flex; align-items: baseline; gap: 1.4rem; flex: none;
       }
       .view-switch button {
-        appearance: none; border: none; background: transparent; color: var(--muted);
-        padding: .35rem .95rem; font-size: .9rem; cursor: pointer; line-height: 1.3;
+        appearance: none; border: none; background: none; color: var(--muted);
+        padding: .35rem 0; font-size: .9rem; cursor: pointer; line-height: 1.3;
       }
-      .view-switch button + button { border-left: 1px solid var(--line); }
       .view-switch button:hover { color: var(--accent); }
-      .view-switch button.is-active { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
-      /* 导入 / 粘贴 / 换示例：单独占一整行，不和板块切换挤在同一排 */
+      .view-switch button.is-active { background: none; color: var(--accent); font-weight: 700; }
+      /* 导入 / 粘贴 / 换示例：文章页头部卡里的第一行（见 .article-card） */
       .import-row {
-        flex: 0 0 100%;
         display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .6rem;
       }
       body.view-words .article-only, body.view-home .article-only { display: none !important; }
@@ -452,7 +458,7 @@
       /* 板块标题同级统一：词表页标题和首页各板块标题、测验/弹窗标题同归 --font-heading */
       .words-head h2 {
         font-family: var(--font-heading);
-        font-size: 1.3rem; margin: 0 0 .35rem; font-weight: 700;
+        font-size: 1.08rem; margin: 0 0 .35rem; font-weight: 700;
       }
       .words-note { color: var(--muted); font-size: .86rem; margin: 0 0 .9rem; line-height: 1.65; }
       .words-tools {
@@ -473,7 +479,7 @@
         padding: .8rem .1rem; cursor: pointer; color: var(--ink);
       }
       .wgroup-head:hover .wgroup-name { color: var(--accent); }
-      .wgroup-name { font-weight: 700; font-size: 1rem; font-family: var(--font-heading); }
+      .wgroup-name { font-weight: 700; font-size: 1.08rem; font-family: var(--font-heading); }
       .wgroup-en { color: var(--muted); font-size: .83rem; font-family: var(--font-serif); font-style: italic; }
       .wgroup-meta { margin-left: auto; color: var(--muted); font-size: .83rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
       .wgroup-chev { color: var(--muted); transition: transform .2s; flex: none; }
@@ -516,14 +522,32 @@
       .reader-tools .rt-label { flex: none; white-space: nowrap; }
       .reader-tools .fontsize, .reader-tools .rate-quick { flex: none; }
       .reader-tools .rt-spacer { flex: 1; min-width: 0; }
-      .reader-tools .btn { font-size: .85rem; flex: none; white-space: nowrap; }
+      .reader-tools .btn { font-size: .9rem; flex: none; white-space: nowrap; }
+
+      /* ---------- 文章页头部合并成一个板块 ----------
+         导入按钮 / 文章标题 / 今日复习 / 提示 / 字号语速 / 词数统计原来散在
+         工具栏和正文上方好几处、层层套框，现在全收进这一张卡，和首页、
+         词表一样是一个板块：卡内只用紧凑行距和一条发丝线分区 */
+      .article-card {
+        background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
+        padding: 1.1rem 1.25rem 1.15rem; box-shadow: var(--shadow); margin-bottom: 1rem;
+      }
+      .article-card-head { padding-bottom: .75rem; border-bottom: 1px solid var(--line); }
+      .doc-line { display: flex; align-items: baseline; gap: .6rem; margin: .55rem 0 0; min-width: 0; }
+      .article-card .doc-title { flex: 1 1 auto; min-width: 0; max-width: none; font-size: .9rem; }
+      .article-card .stats { flex: none; margin-left: 0; }
+      .article-card .guide { margin: .75rem 0 0; }
+      .article-card .review-entry { margin: .75rem 0 0; }
+      .article-card .reader-tools { padding: .75rem .05rem 0; }
+      /* 词数统计在卡内不再自带边框和底色，只是一行文字，别框中框 */
+      .article-card .diff-badge { margin: .65rem 0 0; border: none; background: none; padding: 0; border-radius: 0; }
 
       /* ---------- review entry + difficulty badge ---------- */
       .review-entry {
         display: flex; align-items: center; flex-wrap: wrap; gap: .5rem .8rem;
         margin-bottom: .8rem;
       }
-      .review-btn { font-size: .92rem; }
+      .review-btn { font-size: .9rem; }
       .review-btn strong { color: var(--accent); font-size: 1.05rem; }
       .review-btn:disabled { opacity: .55; cursor: default; }
       .review-btn:disabled strong { color: var(--muted); }
@@ -542,7 +566,7 @@
 
       /* ---------- review card overlay ---------- */
       .review-top { display: flex; align-items: center; gap: .8rem; margin-bottom: .2rem; }
-      .review-top h3 { margin: 0; font-family: var(--font-heading); }
+      .review-top h3 { margin: 0; font-size: 1.08rem; font-family: var(--font-heading); }
       .review-progress { flex: 1; color: var(--muted); font-size: .88rem; }
       /* 翻卡片：正面单词 + 语音按钮，点卡片翻到背面看释义 */
       .review-flip { perspective: 900px; margin: .6rem 0 1rem; }
@@ -572,7 +596,7 @@
       .more-toggle {
         appearance: none; border: none; background: none; box-shadow: none; min-height: 2.25rem;
         color: var(--accent); padding: .3rem 0; margin-top: .55rem;
-        font-size: .88rem; cursor: pointer; text-decoration: underline; text-underline-offset: 4px;
+        font-size: .9rem; cursor: pointer; text-decoration: underline; text-underline-offset: 4px;
       }
       .word-more { margin-top: .2rem; }
       /* ---------- sidebar quick hints ---------- */
@@ -592,6 +616,22 @@
       .hb-count { margin-left: auto; color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
       .hb-note { color: var(--muted); font-size: .88rem; line-height: 1.6; margin: .55rem 0 .8rem; }
       .hb-actions { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
+      /* 今日词数下拉：就在标题里，数字本身是一个选项框，和标题同字号 */
+      .today-count-select {
+        font: inherit; font-size: 1.08rem; font-weight: 700; color: var(--accent);
+        background: var(--paper); border: 1px solid var(--line); border-radius: 8px;
+        padding: .12rem .35rem; min-height: 2.25rem; vertical-align: baseline;
+        font-variant-numeric: tabular-nums; cursor: pointer;
+      }
+      .today-count-select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+      /* 词表里被「学习」标注的今日词：整行淡红浅底（和「学习」按钮同色系）
+         + 左边一条细的强调色竖线 + 单词变强调色；不加小标签、不加编号 */
+      .wword-row.is-today {
+        background: var(--accent-soft); border-radius: 6px;
+        box-shadow: inset 3px 0 0 var(--accent);
+        padding-left: .55rem;
+      }
+      .wword-row.is-today .wword { color: var(--accent); }
 
       .home-article-title { font-family: var(--font-serif); font-size: 1.02rem; margin: 0 0 .2rem; line-height: 1.5; }
 
@@ -644,8 +684,12 @@
       .rate-quick { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
       .rate-quick button {
         appearance: none; border: none; background: var(--paper); color: var(--muted);
-        padding: .3rem .7rem; font-size: .85rem; cursor: pointer; line-height: 1.3; min-height: 2.25rem;
+        font-size: .9rem; cursor: pointer; line-height: 1.3;
         font-variant-numeric: tabular-nums;
+        /* 固定尺寸：两个按钮等宽（3.5rem）等高（2.75rem），整组保持
+           胶囊形；数字用 flex 居中，桌面与手机形状完全一致 */
+        width: 3.5rem; height: 2.75rem; padding: 0; flex: none;
+        display: inline-flex; align-items: center; justify-content: center;
       }
       .rate-quick button + button { border-left: 1px solid var(--line); }
       .rate-quick button.is-active { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
@@ -688,7 +732,7 @@
         padding: 1.2rem 1.4rem 1.35rem; box-shadow: var(--shadow); margin-top: 1rem;
       }
       .quiz-card[hidden] { display: none; }
-      .quiz-title { margin: 0 0 .3rem; font-size: 1.05rem; font-family: var(--font-heading); }
+      .quiz-title { margin: 0 0 .3rem; font-size: 1.08rem; font-family: var(--font-heading); }
       .quiz-note { color: var(--muted); font-size: .87rem; line-height: 1.6; margin: 0 0 .6rem; }
       .quiz-passed { color: #3f9142; font-size: .9rem; margin: 0 0 .6rem; font-weight: 600; }
       @media (prefers-color-scheme: dark) { .quiz-passed { color: #7fc483; } }
@@ -699,7 +743,7 @@
       .quiz-opt {
         appearance: none; text-align: left; border: 1px solid var(--line); background: var(--paper);
         color: var(--ink); border-radius: 10px; padding: .5rem .75rem; cursor: pointer;
-        font-size: .93rem; line-height: 1.5; min-height: 2.5rem;
+        font-size: .9rem; line-height: 1.5; min-height: 2.5rem;
       }
       .quiz-opt:hover { border-color: var(--accent); }
       .quiz-opt.sel { background: var(--accent-soft); border-color: var(--accent); }
@@ -750,12 +794,12 @@
       .selftest-opt {
         appearance: none; text-align: left; border: 1px solid var(--line); background: var(--paper);
         color: var(--ink); border-radius: 10px; padding: .45rem .7rem; cursor: pointer;
-        font-size: .85rem; line-height: 1.45; min-height: 2.4rem;
+        font-size: .9rem; line-height: 1.45; min-height: 2.4rem;
       }
       .selftest-opt:hover { border-color: var(--accent); }
       .selftest-skip {
         appearance: none; border: none; background: none; box-shadow: none;
-        color: var(--muted); font-size: .82rem; cursor: pointer;
+        color: var(--muted); font-size: .9rem; cursor: pointer;
         margin-top: auto; padding-top: .6rem; align-self: center;
         text-decoration: underline; text-underline-offset: 3px; min-height: 2.25rem;
       }
@@ -798,7 +842,7 @@
       .gen-section .gen-card { margin-top: 0; }
       /* 生成器操作行收整：生成按钮和难度下拉固定同一排、垂直居中，
          不再一个占一行一个掉到下一行；桌面上难度靠右和按钮分列两端，
-         手机上下拉占满按钮右边的剩余宽度（见 ≤560px 规则），两端对齐卡片 */
+         手机上下拉只按内容走、约 120px 宽（见 ≤560px 规则），仍同排靠右 */
       .gen-section .hb-actions { margin-top: .35rem; flex-wrap: nowrap; gap: .6rem .8rem; }
       .gen-section .gen-level-label { margin-left: auto; flex: none; }
       /* 「去文章页导入自己的文章」已挪到「推荐短文」下方、生成器板块上方，单独一行 */
@@ -853,7 +897,7 @@
         width: min(680px, 100%); max-height: 88vh; display: flex; flex-direction: column;
         padding: 1.1rem; box-shadow: var(--shadow);
       }
-      .overlay h3 { margin: 0 0 .3rem; font-size: 1.05rem; font-family: var(--font-heading); }
+      .overlay h3 { margin: 0 0 .3rem; font-size: 1.08rem; font-family: var(--font-heading); }
       .overlay p { margin: 0 0 .7rem; color: var(--muted); font-size: .88rem; }
       .overlay textarea {
         flex: 1; min-height: 240px; resize: vertical; border: 1px solid var(--line);
@@ -900,21 +944,22 @@
 
       /* ---------- 窄屏专项 (≤560px，覆盖 360–390px 手机) ---------- */
       @media (max-width: 560px) {
-        .home-card, .words-card { padding: 1.1rem 1rem 1.3rem; }
+        .home-card, .words-card, .article-card { padding: 1.1rem 1rem 1.3rem; }
         .quiz-card { padding: 1rem 1rem 1.15rem; }
         /* 手机端工具栏：上下留白放大，左右留白和桌面同为 .9rem，
            标题和导航不贴屏幕左边缘、不会被裁切 */
         .toolbar { padding: .95rem .9rem .85rem; }
         .toolbar .brand { font-size: 1.22rem; }
-        /* 生成器操作行在手机上仍是一排到底：按钮不收缩、文字不换行，
-           难度标签和下拉占满剩余宽度，下拉右端和卡片内边距对齐 */
+        /* 生成器操作行在手机上仍是一排到底：按钮不收缩、文字不换行；
+           难度下拉不再占满剩余宽度，只按内容走、约 120px 宽，
+           靠右排在「生成」右边，一排不竖排 */
         .gen-section .hb-actions { gap: .55rem; }
         .gen-section #btnGenArticle { flex: none; white-space: nowrap; }
-        .gen-section .gen-level-label { margin-left: 0; flex: 1 1 auto; min-width: 0; }
-        .gen-section .gen-level-label select { flex: 1 1 auto; min-width: 0; }
+        .gen-section .gen-level-label { margin-left: auto; flex: none; min-width: 0; }
+        .gen-section .gen-level-label select { flex: none; width: 7.5rem; min-width: 0; }
         /* 导入那一行在手机上也保持三个按钮同排：不换行、收紧内边距 */
         .import-row { flex-wrap: nowrap; gap: .4rem; }
-        .import-row .btn { padding: .35rem .55rem; font-size: .85rem; white-space: nowrap; }
+        .import-row .btn { padding: .35rem .55rem; font-size: .9rem; white-space: nowrap; }
         /* 背景色点在手机上再收小一号：四个点加间距只占约 68px，
            和标题同排也不会把标题挤出屏幕 */
         .theme-swatches { gap: .375rem; }
@@ -928,10 +973,11 @@
            屏幕上同排排下。（「使用提示」已移到「今日复习」那一排。） */
         .reader-tools { flex-wrap: nowrap; gap: .3rem .35rem; font-size: .8rem; padding: 0 .05rem .6rem; }
         .reader-tools .rt-rate-prefix { display: none; }
-        .reader-tools .fontsize { gap: .15rem; }
-        .reader-tools .fontsize button { padding: .22rem .38rem; font-size: .8rem; }
-        .reader-tools .rate-quick button { padding: .22rem .4rem; font-size: .8rem; white-space: nowrap; }
-        .reader-tools .btn { padding: .3rem .5rem; font-size: .8rem; }
+        /* 字号 / 语速同为胶囊组（见基础样式），组内无间距、靠竖线分隔；
+           按钮是固定尺寸，字号与桌面统一为 0.9rem，不再改内边距和宽高，形状与桌面一致 */
+        .reader-tools .fontsize button { font-size: .9rem; }
+        .reader-tools .rate-quick button { font-size: .9rem; white-space: nowrap; }
+        .reader-tools .btn { padding: .3rem .5rem; font-size: .9rem; }
 
         /* 词表改图标式网格：手机上取消单列，一行 4 个词格，
            一屏能看十几行，下滑距离缩到原来的约四分之一。
@@ -954,6 +1000,12 @@
           text-align: center; font-size: .84rem; line-height: 1.25;
           padding: .3rem .1rem; border-radius: 9px;
         }
+        /* 手机网格里同样是整格淡红底 + 左边细竖线，竖线收进格子圆角内 */
+        .wword-row.is-today {
+          background: var(--accent-soft); padding-left: 0; overflow: hidden;
+          box-shadow: inset 3px 0 0 var(--accent);
+        }
+        .today-count-select { font-size: 1rem; }
         /* 分组标题在窄屏上收一收，英文名太长就让它截断，别把词数挤没 */
         .wgroup-head { gap: .45rem; }
         .wgroup-en { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
@@ -1011,24 +1063,26 @@
         <button type="button" id="btnViewArticle" aria-pressed="false">文章</button>
         <button type="button" id="btnViewWords" aria-pressed="false">词表</button>
       </div>
-      <div class="import-row article-only">
-        <button class="btn primary" id="btnFile" type="button">
-          <svg class="icon" aria-hidden="true"><use href="#i-upload"></use></svg>
-          导入 .txt
-        </button>
-        <input type="file" id="fileInput" accept=".txt,.text,.md,text/plain" hidden />
-        <button class="btn" id="btnPaste" type="button">粘贴文本</button>
-        <button class="btn" id="btnSample" type="button">换示例文章</button>
-      </div>
-      <span class="doc-title article-only" id="docTitle"></span>
-      <span class="stats article-only" id="docStats"></span>
     </div>
 
     <div class="layout">
       <main>
         <div class="home-card home-only" id="homeCard">
-          <section class="home-block" aria-label="今日 30 词">
-            <div class="hb-head"><h3>今日 30 词</h3></div>
+          <section class="home-block" aria-label="今日词" id="todayBlock">
+            <div class="hb-head"><h3><label for="todayCountSel">今日</label>
+              <select class="today-count-select" id="todayCountSel" aria-label="每日词数">
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+                <option value="25">25</option>
+                <option value="30" selected>30</option>
+                <option value="40">40</option>
+                <option value="50">50</option>
+                <option value="60">60</option>
+                <option value="80">80</option>
+                <option value="100">100</option>
+              </select>
+              词</h3></div>
             <p class="hb-note" id="todayNote"></p>
             <div class="hb-actions">
               <button class="btn primary" id="btnHomeWords" type="button">学习</button>
@@ -1039,7 +1093,7 @@
             <div class="hb-head"><h3>临时小测</h3></div>
             <p class="hb-note">从已经发过的词里随机抽 20 个，一题一张卡片：正面选一个中文意思，选完翻到背面看对错，再翻回来就是下一题，全部答完在卡片上出正确率和大概的熟练等级，还会按正确率建议一个生成文章的难度：正确率越高，建议的生词率越高，点一下就能按那个难度生成一篇。不认识的题可以跳过，按未答计。建议只影响那一次生成，不改难度下拉、也不保存成绩，关掉页面就没了。</p>
             <div class="hb-actions">
-              <button class="btn primary" id="btnSelfTest" type="button">测试</button>
+              <button class="btn primary" id="btnSelfTest" type="button" aria-expanded="false">测试</button>
             </div>
             <div class="selftest-area" id="selfTestArea"></div>
           </section>
@@ -1051,7 +1105,7 @@
           </section>
 
           <div class="home-import-actions">
-            <button class="btn primary" id="btnHomeImport" type="button">去文章页导入自己的文章</button>
+            <button class="btn primary" id="btnHomeImport" type="button">导入</button>
           </div>
 
           <section class="home-block gen-section" aria-label="随机生成文章">
@@ -1063,7 +1117,7 @@
               <p class="gen-test-suggest" id="genTestSuggest" hidden></p>
               <p class="hb-note">随机生成器：从 850 词和一份扩展高频词里现编一篇文章，难度自己选。生成的文章不占上面的短文阶梯，文末有 4 道小题。这里的 L 按生词率分档（L1 生词率 0%，只用最基础的词写），和上面短文的 Level 不是一把尺：短文的 Level 按 850 词表外的词占比分档，读到不认识的词点一下就能查。做完上面的临时小测，这里也会按那次正确率给出建议难度。</p>
               <div class="hb-actions">
-                <button class="btn primary" id="btnGenArticle" type="button"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"></use></svg>随机生成一篇</button>
+                <button class="btn primary" id="btnGenArticle" type="button"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"></use></svg>生成</button>
                 <label class="gen-level-label">难度
                   <select id="genLevelSel" aria-label="生成难度">
                     <option value="auto">自动</option>
@@ -1079,7 +1133,23 @@
           </section>
         </div>
 
-        <div class="guide article-only" id="guideBar">
+        <div class="article-card article-only" id="articleCard">
+          <div class="article-card-head">
+            <div class="import-row">
+              <button class="btn primary" id="btnFile" type="button">
+                <svg class="icon" aria-hidden="true"><use href="#i-upload"></use></svg>
+                导入 .txt
+              </button>
+              <input type="file" id="fileInput" accept=".txt,.text,.md,text/plain" hidden />
+              <button class="btn" id="btnPaste" type="button">粘贴文本</button>
+              <button class="btn" id="btnSample" type="button">换示例文章</button>
+            </div>
+            <p class="doc-line">
+              <span class="doc-title" id="docTitle"></span>
+              <span class="stats" id="docStats"></span>
+            </p>
+          </div>
+          <div class="guide article-only" id="guideBar">
           <p>三步开始：<strong>点词</strong>查中文意思 → 点段首 <svg class="icon icon-14" aria-hidden="true"><use href="#i-play"></use></svg> 从本段开始读，读法看播放模式：播放器设置里的<strong>循环按钮</strong>在「全文顺序」和「单段复读」之间切换——全文顺序从这里往下读、读到文末绕回开头；单段复读只循环当前这一段，正在复读时点循环按钮就能切回全文顺序；点播放器里的段落标记「第一段、第二段…」跳到那一段开始读（按当前模式） → 查过的词会标黄，并自动进复习队列，在「今日复习」里翻卡片复习。</p>
           <button class="guide-close" id="btnGuideClose" type="button" aria-label="关闭引导"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg></button>
         </div>
@@ -1091,17 +1161,18 @@
         <div class="reader-tools article-only" role="group" aria-label="阅读工具">
           <span class="rt-label">字号</span>
           <span class="fontsize">
-            <button type="button" id="fontMinus" aria-label="减小字号">A−</button>
-            <button type="button" id="fontPlus" aria-label="增大字号">A＋</button>
+            <button type="button" id="fontMinus" aria-label="减小字号">−</button>
+            <button type="button" id="fontPlus" aria-label="增大字号">＋</button>
           </span>
           <span class="rt-label"><span class="rt-rate-prefix">跟读</span>语速</span>
           <span class="rate-quick" role="group" aria-label="跟读语速">
-            <button type="button" id="rateSlow" aria-pressed="false">0.7× 慢</button>
-            <button type="button" id="rateNorm" aria-pressed="false">1× 正常</button>
+            <button type="button" id="rateSlow" aria-pressed="false">0.7×</button>
+            <button type="button" id="rateNorm" aria-pressed="false">1×</button>
           </span>
           <span class="rt-spacer"></span>
         </div>
-        <div class="diff-badge article-only" id="diffBadge" hidden></div>
+          <div class="diff-badge article-only" id="diffBadge" hidden></div>
+        </div>
         <div class="reader-card" id="readerCard">
           <article id="reader" aria-label="文章正文"></article>
         </div>
@@ -3231,26 +3302,69 @@
         updateDashboard();
       }
 
-      /* 今日 30 词 = 每天发词推进到的最新一批：序号在
-         [todayBatchStart(), progressFrontier()) 之间的词，不存名单、不用打钩，
-         日期一过自动换下一批。 */
+      /* 每日词数可自定义：标题里的下拉选多少就是多少，默认 30，
+         选择存进 prefs，刷新不复位。 */
+      var DAILY_COUNTS = [10, 15, 20, 25, 30, 40, 50, 60, 80, 100];
+      function getDailyCount() {
+        var n = parseInt(prefs.dailyCount, 10);
+        return DAILY_COUNTS.indexOf(n) >= 0 ? n : 30;
+      }
+      /* 今日这批 = 从今天这批的起始序号（todayBatchStart）起，
+         按所选数量往后取 N 个词；到 850 封顶，取不满就只取剩下的。
+         起始点仍按日期推进，保证每天接着上一批往后学、不重复不漏词。 */
       function todayBatchWords() {
-        var start = todayBatchStart(), end = progressFrontier();
-        return flatOgden().filter(function (it) { return it.idx >= start && it.idx < end; })
+        var start = todayBatchStart(), n = getDailyCount();
+        return flatOgden().filter(function (it) { return it.idx >= start && it.idx < start + n; })
           .map(function (it) { return it.word; });
       }
 
-      /* 首页这块只指出今天该学哪一批的起止词；逐词查义在词表里做。 */
+      /* 首页这块指出今天该学哪一批的起止词；逐词查义在词表里做。 */
       function renderToday() {
+        var sel = $('todayCountSel');
+        if (sel) sel.value = String(getDailyCount());
         var words = todayBatchWords();
         $('todayNote').textContent = words.length
-          ? '今天这批是 ' + words[0] + ' 到 ' + words[words.length - 1] + '。点「学习」跳到词表，点词查义就行。'
-          : '点「学习」跳到词表，点词查义就行。';
+          ? '今天这批是 ' + words[0] + ' 到 ' + words[words.length - 1] + '，共 ' + words.length + ' 个。选好词数点「学习」，这批词会在词表里标注出来，点词查义就行。'
+          : '850 个词已经全部发完了。点「学习」跳到词表，点词查义就行。';
+      }
+
+      /* ---------- 词表里标注今日这批词 ----------
+         点「学习」时给这批词的行加上 .is-today（整行淡红浅底 + 左边
+         一条细的强调色竖线），不加小标签、不加编号；换一批或改天后
+         重新点「学习」会先清掉旧标注。
+         标注存进 prefs.todayMark（只存当天），刷新后自动恢复。 */
+      var markedTodayWords = [];
+      function clearTodayMarks() {
+        markedTodayWords = [];
+        if (typeof wordGroups === 'undefined') return;
+        wordGroups.forEach(function (grp) {
+          grp.items.forEach(function (it) {
+            it.row.classList.remove('is-today');
+          });
+        });
+      }
+      function applyTodayMarks(words) {
+        clearTodayMarks();
+        markedTodayWords = (words || []).slice();
+        var set = {};
+        markedTodayWords.forEach(function (w) { set[w] = true; });
+        wordGroups.forEach(function (grp) {
+          grp.items.forEach(function (it) {
+            if (!set[it.word]) return;
+            it.row.classList.add('is-today');
+          });
+        });
+        return markedTodayWords.length;
+      }
+      function restoreTodayMarks() {
+        var m = prefs.todayMark;
+        if (!m || m.date !== dateStr(0) || !m.words || !m.words.length) return;
+        applyTodayMarks(m.words);
       }
 
       /* 展开词表里含今日这批词的组，返回第一个词的行（没有则 null） */
       function openTodayGroups() {
-        var batch = todayBatchWords();
+        var batch = markedTodayWords.length ? markedTodayWords : todayBatchWords();
         var target = null;
         wordGroups.forEach(function (grp) {
           var has = false;
@@ -3262,19 +3376,25 @@
         return target;
       }
 
-      /* 「学习」：跳到词表视图，定位到今天这 30 个词 */
+      /* 「学习」：按所选词数在词表里标注今日这批词，再跳到词表定位到第一个 */
       function goToTodayWords() {
         var search = $('wordsSearch');
         if (search.value) {
           search.value = '';
           search.dispatchEvent(new Event('input')); /* 先清掉搜索过滤，免得目标行被筛选藏起来 */
         }
-        setView('words');
-        if (!todayBatchWords().length) {
+        var batch = todayBatchWords();
+        if (!batch.length) {
+          setView('words');
           toast('850 个词已经全部发完了');
           return;
         }
+        applyTodayMarks(batch);
+        savePrefs({ todayMark: { date: dateStr(0), count: batch.length, words: batch.slice() } });
+        setView('words');
         var target = openTodayGroups();
+        var status = $('wordsStatus');
+        if (status) status.textContent = '已标注今日这批词，淡红底、左边带竖线的就是';
         if (target) {
           setTimeout(function () { target.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 80);
         }
@@ -3426,7 +3546,21 @@
         }
         renderQuestion();
       }
-      $('btnSelfTest').addEventListener('click', startSelfTest);
+      /* 「测试」按钮是开关：卡片没开时点开新测，卡片已开时再点就关掉，
+         不重复开新的一轮。关掉只是清空卡片区，本次小测本就不保存。 */
+      function closeSelfTest() {
+        $('selfTestArea').innerHTML = '';
+        $('btnSelfTest').setAttribute('aria-expanded', 'false');
+      }
+      function toggleSelfTest() {
+        if ($('selfTestArea').innerHTML.trim()) {
+          closeSelfTest();
+        } else {
+          startSelfTest();
+          $('btnSelfTest').setAttribute('aria-expanded', 'true');
+        }
+      }
+      $('btnSelfTest').addEventListener('click', toggleSelfTest);
 
       /* ---------------- graded stories engine (#10) ----------------
          生词率 = 850 词表外的词（按原形算）占全部词的比例；专有名词（句中大写词）不计。
@@ -3650,6 +3784,11 @@
       }, { passive: true });
 
       $('btnHomeWords').addEventListener('click', function () { goToTodayWords(); });
+      $('todayCountSel').addEventListener('change', function () {
+        var n = parseInt(this.value, 10);
+        if (DAILY_COUNTS.indexOf(n) >= 0) savePrefs({ dailyCount: n });
+        renderToday();
+      });
       $('btnHomeImport').addEventListener('click', function () { setView('article'); });
 
       /* ---------------- review session ----------------
@@ -4574,6 +4713,7 @@ function genGenerate(level, env) {
       if (prefs.guideHidden) $('guideBar').hidden = true;
       loadText(SAMPLES[0].text, SAMPLES[0].title, 0);
       buildWordList();
+      restoreTodayMarks();
       applyWordColors();
       updateReviewBar();
       renderToday();
