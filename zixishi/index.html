@@ -86,21 +86,6 @@
         --chip: #e0ecd6;
         --shadow: 0 10px 30px rgba(50, 80, 40, .12);
       }
-      html[data-theme="ocean"] {
-        --bg: #dcebf2;
-        --paper: #f4fafc;
-        --ink: #1d3342;
-        --muted: #5b7686;
-        --line: #bcd4e0;
-        --accent: #0f6f8f;
-        --accent-soft: #cfeaf3;
-        --hl: #ffe9a8;
-        --word-hover: #d9edf5;
-        --word-sel: #8ec9de;
-        --word-new: #ffdf7e;
-        --chip: #e2f0f5;
-        --shadow: 0 10px 30px rgba(20, 70, 95, .12);
-      }
       html[data-theme="night"] {
         --bg: #131417;
         --paper: #1e1f24;
@@ -117,12 +102,10 @@
         --shadow: 0 10px 30px rgba(0, 0, 0, .5);
       }
       html[data-theme="paper"] .btn.primary,
-      html[data-theme="eye"] .btn.primary,
-      html[data-theme="ocean"] .btn.primary { color: #fff; font-weight: 400; }
+      html[data-theme="eye"] .btn.primary { color: #fff; font-weight: 400; }
       html[data-theme="night"] .btn.primary { color: #181410; font-weight: 600; }
       html[data-theme="paper"] .player-bar .pbtn.main,
-      html[data-theme="eye"] .player-bar .pbtn.main,
-      html[data-theme="ocean"] .player-bar .pbtn.main { color: #fff; }
+      html[data-theme="eye"] .player-bar .pbtn.main { color: #fff; }
       html[data-theme="night"] .player-bar .pbtn.main { color: #181410; }
 
       * { box-sizing: border-box; }
@@ -315,8 +298,7 @@
       .para-chip.is-active.is-paused { background: var(--accent-soft); color: var(--accent); }
       @media (prefers-color-scheme: dark) { .para-chip.is-active { color: #181410; } }
       html[data-theme="paper"] .para-chip.is-active,
-      html[data-theme="eye"] .para-chip.is-active,
-      html[data-theme="ocean"] .para-chip.is-active { color: #fff; }
+      html[data-theme="eye"] .para-chip.is-active { color: #fff; }
       html[data-theme="night"] .para-chip.is-active { color: #181410; }
       /* 播放器多出段落条时，正文和 toast 的底部留白跟着加高，别被挡住 */
       body.player-visible.has-para-nav .layout { padding-bottom: 8rem; }
@@ -443,9 +425,10 @@
       }
       .view-switch button:hover { color: var(--accent); }
       .view-switch button.is-active { background: none; color: var(--accent); font-weight: 700; }
-      /* 导入 / 粘贴 / 换示例：文章页头部卡里的第一行（见 .article-card） */
+      /* 导入 / 粘贴 / 换示例：文章页头部卡里标题行下方的一行（见 .article-card） */
       .import-row {
         display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .6rem;
+        margin-top: .55rem;
       }
       body.view-words .article-only, body.view-home .article-only { display: none !important; }
       body:not(.view-home) .home-only { display: none !important; }
@@ -533,7 +516,7 @@
         padding: 1.1rem 1.25rem 1.15rem; box-shadow: var(--shadow); margin-bottom: 1rem;
       }
       .article-card-head { padding-bottom: .75rem; border-bottom: 1px solid var(--line); }
-      .doc-line { display: flex; align-items: baseline; gap: .6rem; margin: .55rem 0 0; min-width: 0; }
+      .doc-line { display: flex; align-items: baseline; gap: .6rem; margin: 0; min-width: 0; }
       .article-card .doc-title { flex: 1 1 auto; min-width: 0; max-width: none; font-size: .9rem; }
       .article-card .stats { flex: none; margin-left: 0; }
       .article-card .guide { margin: .75rem 0 0; }
@@ -624,12 +607,12 @@
         font-variant-numeric: tabular-nums; cursor: pointer;
       }
       .today-count-select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
-      /* 词表里被「学习」标注的今日词：整行淡红浅底（和「学习」按钮同色系）
-         + 左边一条细的强调色竖线 + 单词变强调色；不加小标签、不加编号 */
-      .wword-row.is-today {
-        background: var(--accent-soft); border-radius: 6px;
-        box-shadow: inset 3px 0 0 var(--accent);
-        padding-left: .55rem;
+      /* 词表里被「学习」标注的今日词：无底色、无边框，只在单词前
+         加一个强调色实心圆点 + 单词变强调色；不加小标签、不加编号 */
+      .wword-row.is-today::before {
+        content: ""; flex: none; align-self: center;
+        width: 8px; height: 8px; border-radius: 50%;
+        background: var(--accent);
       }
       .wword-row.is-today .wword { color: var(--accent); }
 
@@ -1000,10 +983,12 @@
           text-align: center; font-size: .84rem; line-height: 1.25;
           padding: .3rem .1rem; border-radius: 9px;
         }
-        /* 手机网格里同样是整格淡红底 + 左边细竖线，竖线收进格子圆角内 */
-        .wword-row.is-today {
-          background: var(--accent-soft); padding-left: 0; overflow: hidden;
-          box-shadow: inset 3px 0 0 var(--accent);
+        /* 手机网格里同样无底色、无边框：圆点改放到格子左上角，
+           不占单词按钮的位置，黄色（.st-new）照样铺满整个格子 */
+        .wword-row.is-today { position: relative; }
+        .wword-row.is-today::before {
+          position: absolute; left: .38rem; top: .38rem;
+          width: 6px; height: 6px;
         }
         .today-count-select { font-size: 1rem; }
         /* 分组标题在窄屏上收一收，英文名太长就让它截断，别把词数挤没 */
@@ -1054,7 +1039,6 @@
         <div class="theme-swatches" role="group" aria-label="选择背景颜色">
           <button class="theme-swatch" type="button" data-set-theme="paper" style="--sw:#f6f3ec" aria-label="背景：纸书" title="纸书" aria-pressed="false"></button>
           <button class="theme-swatch" type="button" data-set-theme="eye" style="--sw:#d9e6d2" aria-label="背景：护眼绿" title="护眼绿" aria-pressed="false"></button>
-          <button class="theme-swatch" type="button" data-set-theme="ocean" style="--sw:#dcebf2" aria-label="背景：海盐蓝" title="海盐蓝" aria-pressed="false"></button>
           <button class="theme-swatch" type="button" data-set-theme="night" style="--sw:#131417" aria-label="背景：夜读" title="夜读" aria-pressed="false"></button>
         </div>
       </div>
@@ -1135,6 +1119,10 @@
 
         <div class="article-card article-only" id="articleCard">
           <div class="article-card-head">
+            <p class="doc-line">
+              <span class="doc-title" id="docTitle"></span>
+              <span class="stats" id="docStats"></span>
+            </p>
             <div class="import-row">
               <button class="btn primary" id="btnFile" type="button">
                 <svg class="icon" aria-hidden="true"><use href="#i-upload"></use></svg>
@@ -1144,10 +1132,6 @@
               <button class="btn" id="btnPaste" type="button">粘贴文本</button>
               <button class="btn" id="btnSample" type="button">换示例文章</button>
             </div>
-            <p class="doc-line">
-              <span class="doc-title" id="docTitle"></span>
-              <span class="stats" id="docStats"></span>
-            </p>
           </div>
           <div class="guide article-only" id="guideBar">
           <p>三步开始：<strong>点词</strong>查中文意思 → 点段首 <svg class="icon icon-14" aria-hidden="true"><use href="#i-play"></use></svg> 从本段开始读，读法看播放模式：播放器设置里的<strong>循环按钮</strong>在「全文顺序」和「单段复读」之间切换——全文顺序从这里往下读、读到文末绕回开头；单段复读只循环当前这一段，正在复读时点循环按钮就能切回全文顺序；点播放器里的段落标记「第一段、第二段…」跳到那一段开始读（按当前模式） → 查过的词会标黄，并自动进复习队列，在「今日复习」里翻卡片复习。</p>
@@ -3031,7 +3015,7 @@
 
       /* ---------------- themes ---------------- */
 
-      var THEME_NAMES = { paper: '纸书', eye: '护眼绿', ocean: '海盐蓝', night: '夜读' };
+      var THEME_NAMES = { paper: '纸书', eye: '护眼绿', night: '夜读' };
 
       function applyTheme(name, announce) {
         if (!THEME_NAMES[name]) name = 'paper';
@@ -3329,8 +3313,8 @@
       }
 
       /* ---------- 词表里标注今日这批词 ----------
-         点「学习」时给这批词的行加上 .is-today（整行淡红浅底 + 左边
-         一条细的强调色竖线），不加小标签、不加编号；换一批或改天后
+         点「学习」时给这批词的行加上 .is-today（无底色、无边框，
+         只在单词前加一个强调色实心圆点），不加小标签、不加编号；换一批或改天后
          重新点「学习」会先清掉旧标注。
          标注存进 prefs.todayMark（只存当天），刷新后自动恢复。 */
       var markedTodayWords = [];
@@ -3394,7 +3378,7 @@
         setView('words');
         var target = openTodayGroups();
         var status = $('wordsStatus');
-        if (status) status.textContent = '已标注今日这批词，淡红底、左边带竖线的就是';
+        if (status) status.textContent = '已标注今日这批词，前面带圆点的就是';
         if (target) {
           setTimeout(function () { target.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 80);
         }
