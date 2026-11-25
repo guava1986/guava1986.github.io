@@ -10,16 +10,17 @@
   * { box-sizing: border-box; }
   body {
     margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
     color: #1a1a1a;
     background: #f7f3ea;
     line-height: 1.8;
     text-align: center;
   }
-  .wrap { max-width: 680px; margin: 0 auto; padding: 56px 24px 80px; }
-  header { border-bottom: 1px solid #1a1a1a; padding-bottom: 24px; margin-bottom: 32px; }
-  .kicker { font-size: 13px; letter-spacing: .35em; color: #777; }
-  h1 { font-size: 56px; line-height: 1.1; margin: 12px 0 8px; font-weight: 600; }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 24px; }
   section { margin: 36px 0; }
   h2 { font-size: 20px; margin: 0 0 12px; border-bottom: 1px solid #ccc; padding-bottom: 6px; }
   p { margin: 0 0 14px; font-size: 17px; }
@@ -27,16 +28,10 @@
   li { margin-bottom: 8px; }
   a { color: #1a1a1a; text-underline-offset: 3px; }
   footer { margin-top: 56px; border-top: 1px solid #ccc; padding-top: 16px; font-size: 14px; color: #888; }
-  @media (max-width: 520px) { h1 { font-size: 44px; } }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <div class="kicker">个人主页 · PERSONAL SITE</div>
-    <h1>耒</h1>
-  </header>
-
   <section>
     <h2>自习室</h2>
     <ul>

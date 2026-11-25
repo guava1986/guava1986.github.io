@@ -127,7 +127,10 @@
       .toolbar {
         position: sticky; top: 0; z-index: 30;
         display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .6rem;
-        padding: .7rem .9rem .6rem;
+        /* 左右留白随窗口变宽而变大，让标题、中间按钮组、右上角色点正好落在
+           正文栏（.layout，最大 1024px 居中）的两端之内，和文章板块两端对齐；
+           窗口窄于正文栏时退回 .9rem，和原来一样 */
+        padding: .7rem max(.9rem, calc((100% - 1024px) / 2 + .9rem)) .6rem;
         background: var(--paper);
         border-bottom: 1px solid var(--line);
         transition: transform .3s ease;
@@ -683,6 +686,11 @@
       /* 小测翻卡片：正面单词在上、选项小字在下，选完翻到背面看对错，
          点「下一题」翻回来就是下一题；最后一题翻回来，卡片正面公布成绩 */
       .selftest-flip { perspective: 900px; }
+      /* 桌面端卡片太宽：左右两端各向内收整个卡片的三分之一，卡片居中、只剩约三分之一宽。
+         只在宽屏生效，手机端保持整宽原样 */
+      @media (min-width: 900px) {
+        .selftest-flip { max-width: 33.333%; margin-left: auto; margin-right: auto; }
+      }
       .selftest-flip-inner {
         position: relative; height: 19.5rem;
         transform-style: preserve-3d; transition: transform .45s ease;
@@ -750,6 +758,9 @@
 
       /* ---------- adaptive article generator (#15) ---------- */
       .gen-card { border: 1px dashed var(--line); border-radius: 12px; padding: .85rem .95rem .95rem; margin-top: .95rem; }
+      /* 生成器已拆成「推荐短文」下方的独立板块：板块本身带顶边距，卡片不再叠加上边距 */
+      .gen-section .gen-card { margin-top: 0; }
+      .gen-section .hb-actions { margin-top: .8rem; }
       .gen-head { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
       .gen-badge { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); font-size: .8rem; }
       .gen-info { color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; }
@@ -962,6 +973,9 @@
             <div class="hb-head"><h3>推荐短文</h3></div>
             <p class="hb-note" id="storyNote"></p>
             <div class="story-list" id="storyList"></div>
+          </section>
+
+          <section class="home-block gen-section" aria-label="随机生成文章">
             <div class="gen-card" id="genCard">
               <div class="gen-head">
                 <span class="story-badge gen-badge" id="genBadge">L1</span>
@@ -2564,12 +2578,27 @@
 
       $('bubbleClose').addEventListener('click', hideBubble);
       document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hideBubble(); });
-      /* 点气泡外面就收起；点另一个词不算外面——查词会把气泡直接挪过去 */
+      /* 点气泡外面就收起；点另一个词不算外面——查词会把气泡直接挪过去。
+         「在不在气泡里」要用事件的传播路径判断，不能用 e.target.closest：
+         气泡里点标黄词 / 同义词续查时，续查会先重写气泡内容、把被点元素摘出 DOM，
+         点击冒泡到 document 时 closest 沿现存 DOM 已经找不到气泡，
+         会误判成「点在气泡外面」，把刚续查的气泡立刻关掉。 */
       document.addEventListener('click', function (e) {
-        if (!$('wordBubble').classList.contains('show')) return;
-        if (!e.target.closest) return;
-        if (e.target.closest('#wordBubble')) return;
-        if (e.target.closest('.w, .wword')) return;
+        var bubble = $('wordBubble');
+        if (!bubble.classList.contains('show')) return;
+        var path = (typeof e.composedPath === 'function') ? e.composedPath() : null;
+        if (path) {
+          for (var i = 0; i < path.length; i++) {
+            var node = path[i];
+            if (node === bubble) return;
+            if (node.classList && (node.classList.contains('w') || node.classList.contains('wword'))) return;
+          }
+        } else if (e.target.closest) {
+          if (e.target.closest('#wordBubble')) return;
+          if (e.target.closest('.w, .wword')) return;
+        } else {
+          return;
+        }
         hideBubble();
       });
 
