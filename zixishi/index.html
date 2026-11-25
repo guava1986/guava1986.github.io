@@ -24,6 +24,18 @@
         --chip: #efe8d8;
         --shadow: 0 10px 30px rgba(60, 45, 20, .14);
         --reader-size: 1.16rem;
+        /* ---------- 字体分工（报纸风：英文衬线 / 中文无衬线，不引入外部字体文件） ----------
+           --font-serif：英文内容用——阅读正文、词头、单词、短文与文章标题、品牌字；
+             英文衬线在前，正文里偶有中文时落到宋体类衬线，和英文阅读同属一套。
+           --font-sans：中文与界面用——按钮、说明、中文释义与翻译、音标（符号用无衬线更清楚）。
+           --font-reader / --font-heading 是按用途起的别名：阅读正文归衬线，
+             各级板块标题统一归无衬线（和词表页标题、首页板块标题同级同字体）。
+           每条字体栈末尾都补 system-ui 作系统兜底：前面列的字体在某平台缺失时，
+             最后落到系统默认字体，不至于回退到浏览器缺省怪字体。 */
+        --font-serif: Georgia, "Iowan Old Style", "Times New Roman", Times, "Songti SC", "STSong", "SimSun", serif, system-ui;
+        --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", sans-serif, system-ui;
+        --font-reader: var(--font-serif);
+        --font-heading: var(--font-sans);
       }
       @media (prefers-color-scheme: dark) {
         :root {
@@ -119,18 +131,19 @@
         margin: 0;
         background: var(--bg);
         color: var(--ink);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        font-family: var(--font-sans);
         line-height: 1.55;
       }
 
       /* ---------- toolbar ---------- */
       .toolbar {
         position: sticky; top: 0; z-index: 30;
-        display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .6rem;
+        display: flex; flex-wrap: wrap; align-items: center; gap: .85rem .6rem;
         /* 左右留白随窗口变宽而变大，让标题、中间按钮组、右上角色点正好落在
            正文栏（.layout，最大 1024px 居中）的两端之内，和文章板块两端对齐；
-           窗口窄于正文栏时退回 .9rem，和原来一样 */
-        padding: .7rem max(.9rem, calc((100% - 1024px) / 2 + .9rem)) .6rem;
+           窗口窄于正文栏时退回 .9rem，和原来一样。
+           上下留白和行距都比原来放大一档：标题行、导航行不再挤在一起 */
+        padding: 1.05rem max(.9rem, calc((100% - 1024px) / 2 + .9rem)) .9rem;
         background: var(--paper);
         border-bottom: 1px solid var(--line);
         transition: transform .3s ease;
@@ -145,12 +158,12 @@
       .toolbar .title-row {
         flex: 0 0 100%;
         display: flex; align-items: center; gap: .8rem;
-        padding-bottom: .5rem;
+        padding-bottom: .8rem;
         border-bottom: 1px solid var(--line);
       }
       .toolbar .brand {
         flex: 1 1 auto; min-width: 0;
-        font-family: Georgia, "Times New Roman", serif;
+        font-family: var(--font-serif);
         font-weight: 700; font-size: 1.35rem; letter-spacing: .02em; line-height: 1.25;
         margin: 0;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -176,14 +189,22 @@
       .btn.primary:disabled:hover { border-color: var(--accent); }
       .btn.confirm-danger { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
       @media (prefers-color-scheme: dark) { .btn.primary { color: #181410; font-weight: 600; } }
-      .btn svg { width: 15px; height: 15px; flex: none; }
+      .btn svg { width: 16px; height: 16px; flex: none; }
+      /* ---------- 共用图标：Lucide 风格 SVG sprite（symbol 定义在 body 开头），
+         全部 24×24 viewBox、同一描边/填充语言；尺寸只按上下文取 14 / 16 / 18px
+         三档，按钮内的上下文规则（.pbtn svg、.speak-btn svg 等）可覆盖默认 16px ---------- */
+      .icon { width: 16px; height: 16px; flex: none; display: inline-block; vertical-align: middle; }
+      .icon-14 { width: 14px; height: 14px; }
+      .icon-16 { width: 16px; height: 16px; }
+      .icon-18 { width: 18px; height: 18px; }
       .stats { margin-left: auto; color: var(--muted); font-size: .83rem; white-space: nowrap; }
       .doc-title { font-size: .83rem; color: var(--muted); max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
       /* ---------- layout ---------- */
+      /* 顶部留白加大：正文整个板块离导航栏远一点，不再贴着工具栏（原 1.1rem 太挤） */
       .layout {
         max-width: 1024px; margin: 0 auto;
-        padding: 1.1rem .9rem 3rem;
+        padding: 2rem .9rem 3rem;
       }
 
       /* ---------- playback (bottom player, hidden until first play click) ----------
@@ -225,11 +246,13 @@
         margin-top: .5rem; padding-top: .55rem; border-top: 1px dashed var(--line);
       }
       .player-settings[hidden] { display: none; }
+      /* 关闭按钮全站统一：同一个圆形容器（2.25rem，触屏 2.75rem）、同一图标尺寸，
+         .player-close / .guide-close / .bubble-close 三处共用这套规格 */
       .player-close {
         width: 2.25rem; height: 2.25rem; min-height: 2.25rem; border-radius: 50%;
         border: 1px solid var(--line); background: var(--paper); color: var(--ink);
         cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
-        padding: 0; font-size: .95rem; flex: none;
+        padding: 0; flex: none;
       }
       .player-close:hover { border-color: var(--accent); color: var(--accent); }
       .player-bar .pbtn {
@@ -239,9 +262,9 @@
       }
       .player-bar .pbtn.main { background: var(--accent); border-color: var(--accent); color: #fff; width: 2.8rem; height: 2.8rem; }
       @media (prefers-color-scheme: dark) { .player-bar .pbtn.main { color: #181410; } }
-      .player-bar .pbtn svg { width: 17px; height: 17px; }
+      .player-bar .pbtn svg { width: 18px; height: 18px; }
       .player-bar .pbtn.loop-off { opacity: .45; }
-      .player-bar .pbtn.main svg { width: 19px; height: 19px; }
+      .player-bar .pbtn.main svg { width: 18px; height: 18px; }
       .player-settings label { font-size: .8rem; color: var(--muted); display: flex; align-items: center; gap: .5rem; }
       .player-settings label.rate-label { flex: 0 1 13rem; }
       .player-settings label.voice-label { flex: 0 1 15rem; }
@@ -307,7 +330,7 @@
       }
       .reader-card.dragover { outline: 2px dashed var(--accent); outline-offset: -8px; }
       #reader {
-        font-family: Georgia, "Iowan Old Style", "Times New Roman", "Songti SC", serif;
+        font-family: var(--font-reader);
         font-size: var(--reader-size); line-height: 1.95; overflow-wrap: break-word;
       }
       #reader p { margin: 0; }
@@ -325,7 +348,7 @@
       .para-translate-link {
         appearance: none; border: none; background: none; box-shadow: none; min-height: 0;
         color: var(--muted); padding: .1rem .2rem; margin-left: .35rem;
-        font-size: .8rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        font-size: .8rem; font-family: var(--font-sans);
         cursor: pointer; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap;
         vertical-align: baseline;
       }
@@ -335,7 +358,7 @@
       .para-translation {
         display: none; margin-top: .55rem; padding: .75rem .85rem;
         background: var(--chip); border: 1px solid var(--line); border-radius: 10px;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        font-family: var(--font-sans);
         font-size: .94rem; line-height: 1.75; color: var(--ink);
       }
       .para-translation.show { display: block; }
@@ -350,26 +373,29 @@
       #reader .w.sel { background: var(--word-sel); opacity: 1; }
       .empty-note { color: var(--muted); font-family: inherit; }
 
-      /* ---------- 释义气泡内容（原侧边栏查词的排版，气泡里复用） ---------- */
+      /* ---------- 释义气泡内容（原侧边栏查词的排版，气泡里复用） ----------
+         气泡内字体归属统一按变量分工，不再靠继承碰运气：
+         英文词头 / 词性 / 英文释义 / 英文例句 / 相关词 chip 归 --font-serif；
+         音标 / 中文释义 / 中文小标题 / 句译 / 提示文字归 --font-sans。 */
       .word-head { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
       .word-head .word {
-        font-family: Georgia, "Times New Roman", serif;
+        font-family: var(--font-serif);
         font-size: 1.75rem; font-weight: 700; line-height: 1.15;
       }
-      .word-head .phonetic { color: var(--muted); font-size: 1rem; }
+      .word-head .phonetic { color: var(--muted); font-size: 1rem; font-family: var(--font-sans); }
       .speak-btn {
         margin-left: auto; width: 2.4rem; height: 2.4rem; border-radius: 50%;
         border: 1px solid var(--line); background: var(--paper); color: var(--accent);
         cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0;
       }
-      .speak-btn svg { width: 17px; height: 17px; }
-      .zh { font-size: 1.06rem; margin: .45rem 0 .1rem; line-height: 1.55; }
+      .speak-btn svg { width: 16px; height: 16px; }
+      .zh { font-size: 1.06rem; margin: .45rem 0 .1rem; line-height: 1.55; font-family: var(--font-sans); }
       .zh:empty { display: none; }
       .zh .zh-note { color: var(--muted); font-size: .85rem; margin-left: .45rem; white-space: nowrap; }
-      .pos { color: var(--accent); font-style: italic; font-family: Georgia, serif; font-size: .92rem; margin-top: .8rem; }
-      .def { margin: .25rem 0 .1rem; font-size: .95rem; }
+      .pos { color: var(--accent); font-style: italic; font-family: var(--font-serif); font-size: .92rem; margin-top: .8rem; }
+      .def { margin: .25rem 0 .1rem; font-size: .95rem; font-family: var(--font-serif); }
       .def .num { color: var(--muted); margin-right: .35rem; }
-      .example { color: var(--muted); font-size: .9rem; font-style: italic; margin: .15rem 0 .3rem 1.1rem; }
+      .example { color: var(--muted); font-size: .9rem; font-style: italic; margin: .15rem 0 .3rem 1.1rem; font-family: var(--font-serif); }
       .example-row { display: flex; align-items: flex-start; gap: .3rem; margin: .15rem 0 .3rem 1.1rem; }
       .example-row .example { margin: 0; flex: 1; min-width: 0; }
       .example-speak {
@@ -380,22 +406,23 @@
       }
       .example-speak:hover { border-color: var(--accent); }
       .example-speak svg { width: 14px; height: 14px; }
-      .rel-title { font-size: .8rem; color: var(--muted); margin: .8rem 0 .35rem; letter-spacing: .05em; }
+      .rel-title { font-size: .8rem; color: var(--muted); margin: .8rem 0 .35rem; letter-spacing: .05em; font-family: var(--font-sans); }
       .chips { display: flex; flex-wrap: wrap; gap: .35rem; }
       .chip {
         background: var(--chip); border: 1px solid var(--line); border-radius: 999px;
         padding: .28rem .7rem; font-size: .86rem; cursor: pointer; color: var(--ink);
-        font-family: Georgia, "Times New Roman", serif;
+        font-family: var(--font-serif);
       }
       .chip:hover { border-color: var(--accent); color: var(--accent); }
       .sent-translation {
         margin-top: .8rem; padding: .6rem .7rem; border-radius: 10px;
         background: var(--chip); font-size: .92rem; display: none;
+        font-family: var(--font-sans);
       }
       .sent-translation.show { display: block; }
-      .loading { color: var(--muted); font-size: .92rem; padding: .6rem 0; }
-      .notfound { color: var(--muted); font-size: .92rem; }
-      .word-hint { color: var(--muted); font-size: .93rem; margin: 0; }
+      .loading { color: var(--muted); font-size: .92rem; padding: .6rem 0; font-family: var(--font-sans); }
+      .notfound { color: var(--muted); font-size: .92rem; font-family: var(--font-sans); }
+      .word-hint { color: var(--muted); font-size: .93rem; margin: 0; font-family: var(--font-sans); }
 
       /* ---------- view switch （文章 / 词表） ---------- */
       .view-switch {
@@ -422,8 +449,9 @@
         background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
         padding: 1.35rem 1.5rem 1.6rem; box-shadow: var(--shadow);
       }
+      /* 板块标题同级统一：词表页标题和首页各板块标题、测验/弹窗标题同归 --font-heading */
       .words-head h2 {
-        font-family: Georgia, "Times New Roman", serif;
+        font-family: var(--font-heading);
         font-size: 1.3rem; margin: 0 0 .35rem; font-weight: 700;
       }
       .words-note { color: var(--muted); font-size: .86rem; margin: 0 0 .9rem; line-height: 1.65; }
@@ -445,10 +473,10 @@
         padding: .8rem .1rem; cursor: pointer; color: var(--ink);
       }
       .wgroup-head:hover .wgroup-name { color: var(--accent); }
-      .wgroup-name { font-weight: 700; font-size: 1rem; }
-      .wgroup-en { color: var(--muted); font-size: .83rem; font-family: Georgia, serif; font-style: italic; }
+      .wgroup-name { font-weight: 700; font-size: 1rem; font-family: var(--font-heading); }
+      .wgroup-en { color: var(--muted); font-size: .83rem; font-family: var(--font-serif); font-style: italic; }
       .wgroup-meta { margin-left: auto; color: var(--muted); font-size: .83rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
-      .wgroup-chev { color: var(--muted); font-size: .8rem; transition: transform .2s; flex: none; }
+      .wgroup-chev { color: var(--muted); transition: transform .2s; flex: none; }
       .wgroup.open .wgroup-chev { transform: rotate(180deg); }
       .wgroup-body { display: none; }
       .wgroup.open .wgroup-body {
@@ -458,7 +486,7 @@
       .wword {
         appearance: none; border: none; background: none;
         color: var(--ink); border-radius: 6px; padding: .2rem .3rem; margin-left: -.3rem;
-        font-family: Georgia, "Times New Roman", serif; font-size: 1rem; font-weight: 700;
+        font-family: var(--font-serif); font-size: 1rem; font-weight: 700;
         cursor: pointer; line-height: 1.35; text-align: left;
       }
       .wword:hover { color: var(--accent); }
@@ -475,10 +503,12 @@
       .guide[hidden] { display: none; }
       .guide p { margin: 0; flex: 1; }
       .guide-close {
-        flex: none; width: 2.25rem; height: 2.25rem; border-radius: 50%;
+        flex: none; width: 2.25rem; height: 2.25rem; min-height: 2.25rem; border-radius: 50%;
         border: 1px solid var(--line); background: var(--paper); color: var(--ink);
-        cursor: pointer; padding: 0; font-size: .9rem;
+        cursor: pointer; padding: 0;
+        display: inline-flex; align-items: center; justify-content: center;
       }
+      .guide-close:hover { border-color: var(--accent); color: var(--accent); }
       .reader-tools {
         display: flex; align-items: center; flex-wrap: nowrap; gap: .5rem .8rem;
         padding: 0 .15rem .7rem; font-size: .85rem; color: var(--muted);
@@ -512,7 +542,7 @@
 
       /* ---------- review card overlay ---------- */
       .review-top { display: flex; align-items: center; gap: .8rem; margin-bottom: .2rem; }
-      .review-top h3 { margin: 0; }
+      .review-top h3 { margin: 0; font-family: var(--font-heading); }
       .review-progress { flex: 1; color: var(--muted); font-size: .88rem; }
       /* 翻卡片：正面单词 + 语音按钮，点卡片翻到背面看释义 */
       .review-flip { perspective: 900px; margin: .6rem 0 1rem; }
@@ -530,7 +560,7 @@
         backface-visibility: hidden; -webkit-backface-visibility: hidden;
       }
       .review-face-back { transform: rotateY(180deg); cursor: default; }
-      .review-word { font-family: Georgia, "Times New Roman", serif; font-size: 2rem; font-weight: 700; line-height: 1.2; }
+      .review-word { font-family: var(--font-serif); font-size: 2rem; font-weight: 700; line-height: 1.2; }
       .review-face .speak-btn { margin-left: 0; }
       .review-flip-hint { color: var(--muted); font-size: .8rem; margin: 0; }
       .review-gloss { font-size: 1.12rem; line-height: 1.65; margin: 0; }
@@ -558,12 +588,12 @@
       .home-block { border-top: 1px solid var(--line); padding: 1.05rem 0 .35rem; margin-top: 1.05rem; }
       .home-block:first-child { border-top: none; margin-top: 0; padding-top: .35rem; }
       .hb-head { display: flex; align-items: baseline; gap: .7rem; flex-wrap: wrap; margin-bottom: .5rem; }
-      .hb-head h3 { margin: 0; font-size: 1.08rem; }
+      .hb-head h3 { margin: 0; font-size: 1.08rem; font-family: var(--font-heading); }
       .hb-count { margin-left: auto; color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
       .hb-note { color: var(--muted); font-size: .88rem; line-height: 1.6; margin: .55rem 0 .8rem; }
       .hb-actions { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
 
-      .home-article-title { font-family: Georgia, "Times New Roman", serif; font-size: 1.02rem; margin: 0 0 .2rem; line-height: 1.5; }
+      .home-article-title { font-family: var(--font-serif); font-size: 1.02rem; margin: 0 0 .2rem; line-height: 1.5; }
 
       /* ---------- word list rows ---------- */
       .wword-row {
@@ -578,6 +608,8 @@
       .word-bubble {
         position: fixed; left: 0; top: 0; z-index: 120;
         width: min(21rem, calc(100vw - 1.25rem));
+        /* 气泡底字体归界面无衬线，英文词头/释义/例句在各自规则里改归衬线 */
+        font-family: var(--font-sans);
         background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
         box-shadow: var(--shadow);
         opacity: 0; visibility: hidden; transform: translateY(5px) scale(.97);
@@ -599,12 +631,13 @@
       .bubble-close {
         position: absolute; top: .35rem; right: .35rem; z-index: 2;
         width: 2.25rem; height: 2.25rem; min-height: 2.25rem; border-radius: 50%;
-        border: none; background: none; color: var(--muted);
-        cursor: pointer; font-size: .9rem; padding: 0;
+        border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+        cursor: pointer; padding: 0;
         display: inline-flex; align-items: center; justify-content: center;
       }
-      .bubble-close:hover { color: var(--accent); background: var(--chip); }
-      .word-bubble .word-head { padding-right: 1.7rem; }
+      .bubble-close:hover { border-color: var(--accent); color: var(--accent); }
+      /* 关闭改成带边框的圆按钮后，标题行右侧留白加大，免得发音圆按钮和它挤在一起 */
+      .word-bubble .word-head { padding-right: 3rem; }
       .word-bubble .word-head .word { font-size: 1.45rem; }
 
       /* ---------- follow-reading rate quick select (#12) ---------- */
@@ -640,7 +673,7 @@
         .story-badge.lvl1 { color: #7fc483; }
         .story-badge.lvl2 { color: #e0aa4e; }
       }
-      .story-title { font-family: Georgia, "Times New Roman", serif; font-weight: 700; flex: none; }
+      .story-title { font-family: var(--font-serif); font-weight: 700; flex: none; }
       .story-meta { margin-left: auto; flex: none; color: var(--muted); font-size: .8rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
       .story-meta.done { color: #3f9142; font-weight: 600; }
       @media (prefers-color-scheme: dark) { .story-meta.done { color: #7fc483; } }
@@ -655,7 +688,7 @@
         padding: 1.2rem 1.4rem 1.35rem; box-shadow: var(--shadow); margin-top: 1rem;
       }
       .quiz-card[hidden] { display: none; }
-      .quiz-title { margin: 0 0 .3rem; font-size: 1.05rem; }
+      .quiz-title { margin: 0 0 .3rem; font-size: 1.05rem; font-family: var(--font-heading); }
       .quiz-note { color: var(--muted); font-size: .87rem; line-height: 1.6; margin: 0 0 .6rem; }
       .quiz-passed { color: #3f9142; font-size: .9rem; margin: 0 0 .6rem; font-weight: 600; }
       @media (prefers-color-scheme: dark) { .quiz-passed { color: #7fc483; } }
@@ -706,7 +739,7 @@
       .selftest-face-back { transform: rotateY(180deg); align-items: center; justify-content: center; text-align: center; gap: .7rem; }
       .selftest-progress { margin: 0 0 .4rem; color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; }
       .selftest-word-big {
-        font-family: Georgia, "Times New Roman", serif; font-weight: 700;
+        font-family: var(--font-serif); font-weight: 700;
         font-size: 1.7rem; line-height: 1.2; margin: 0 0 .85rem; text-align: center;
       }
       /* 单词和语音按钮同排居中：点按钮只发音，不影响答题 */
@@ -728,11 +761,14 @@
       }
       .selftest-verdict { font-size: 1.05rem; font-weight: 700; margin: 0; }
       .selftest-verdict.is-mark { font-size: 2.1rem; line-height: 1.1; }
+      /* 判分标记改用共用 check / x 图标，尺寸对齐原来的大字号；颜色语义不变：
+         对了绿、错了红，红色全站只取 --accent 一种 */
+      .selftest-verdict.is-mark .icon { width: 2.1rem; height: 2.1rem; }
       .selftest-verdict.right { color: #3f9142; }
       .selftest-verdict.wrong { color: var(--accent); }
-      .selftest-verdict.wrong.is-mark { color: #c0392b; }
-      @media (prefers-color-scheme: dark) { .selftest-verdict.right { color: #7fc483; } .selftest-verdict.wrong.is-mark { color: #ef9a8f; } }
-      .selftest-back-word { font-family: Georgia, "Times New Roman", serif; font-weight: 700; font-size: 1.3rem; margin: 0; }
+      .selftest-verdict.wrong.is-mark { color: var(--accent); }
+      @media (prefers-color-scheme: dark) { .selftest-verdict.right { color: #7fc483; } }
+      .selftest-back-word { font-family: var(--font-serif); font-weight: 700; font-size: 1.3rem; margin: 0; }
       .selftest-back-gloss { font-size: .95rem; line-height: 1.6; margin: 0; }
       .selftest-back-picked { color: var(--muted); font-size: .85rem; margin: 0; }
       .selftest-face .btn { min-height: 2.6rem; padding-left: 1.4rem; padding-right: 1.4rem; }
@@ -760,7 +796,19 @@
       .gen-card { border: 1px dashed var(--line); border-radius: 12px; padding: .85rem .95rem .95rem; margin-top: .95rem; }
       /* 生成器已拆成「推荐短文」下方的独立板块：板块本身带顶边距，卡片不再叠加上边距 */
       .gen-section .gen-card { margin-top: 0; }
-      .gen-section .hb-actions { margin-top: .8rem; }
+      /* 生成器操作行收整：生成按钮和难度下拉固定同一排、垂直居中，
+         不再一个占一行一个掉到下一行；桌面上难度靠右和按钮分列两端，
+         手机上下拉占满按钮右边的剩余宽度（见 ≤560px 规则），两端对齐卡片 */
+      .gen-section .hb-actions { margin-top: .35rem; flex-wrap: nowrap; gap: .6rem .8rem; }
+      .gen-section .gen-level-label { margin-left: auto; flex: none; }
+      /* 「去文章页导入自己的文章」已挪到「推荐短文」下方、生成器板块上方，单独一行 */
+      .home-import-actions { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; padding: .9rem 0 .15rem; }
+      /* 移动后单独锚定这个按钮的主按钮背景：不只依赖共用的 .btn.primary，
+         再按它在新位置的容器 + 自身 id 明确写一遍强调色背景和边框，
+         保证在手机端也和「学习」「测试」一样是实心强调色，不会被任何
+         容器级或设备级样式冲掉。文字颜色仍走 .btn.primary 的原有规则，
+         和其它主按钮保持一致（含夜读主题的深色字）。 */
+      .home-import-actions #btnHomeImport.btn.primary { background: var(--accent); border-color: var(--accent); }
       .gen-head { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
       .gen-badge { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); font-size: .8rem; }
       .gen-info { color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; }
@@ -768,7 +816,7 @@
       .gen-level-label { display: inline-flex; align-items: center; gap: .45rem; color: var(--muted); font-size: .88rem; }
       .gen-level-label select {
         font: inherit; color: var(--ink); background: var(--paper);
-        border: 1px solid var(--line); border-radius: 8px; padding: .35rem .5rem; min-height: 2.4rem;
+        border: 1px solid var(--line); border-radius: 8px; padding: .35rem .5rem; min-height: 2.25rem;
       }
       .quiz-gen-head { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; margin-bottom: .3rem; }
       .quiz-gen-head .quiz-title { margin: 0; }
@@ -779,7 +827,7 @@
         margin-top: .65rem; border: 1px solid var(--line); border-radius: 10px;
         background: var(--chip); padding: .55rem .7rem;
       }
-      .colloc-row { margin: 0; font-size: .92rem; line-height: 1.6; }
+      .colloc-row { margin: 0; font-size: .92rem; line-height: 1.6; font-family: var(--font-sans); }
       .colloc-row + .colloc-row { margin-top: .3rem; }
       .colloc-tag {
         display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .05em;
@@ -788,9 +836,9 @@
       }
       .def-w {
         background: var(--word-new); color: inherit; border-radius: 3px;
-        padding: 0 .12em; cursor: pointer;
+        padding: 0 .12em; cursor: pointer; font-family: var(--font-serif);
       }
-      .def-note { color: var(--muted); font-size: .85rem; line-height: 1.6; margin: .7rem 0 0; }
+      .def-note { color: var(--muted); font-size: .85rem; line-height: 1.6; margin: .7rem 0 0; font-family: var(--font-sans); }
       .def-note .def-w { cursor: default; }
 
       /* ---------- paste overlay ---------- */
@@ -805,13 +853,13 @@
         width: min(680px, 100%); max-height: 88vh; display: flex; flex-direction: column;
         padding: 1.1rem; box-shadow: var(--shadow);
       }
-      .overlay h3 { margin: 0 0 .3rem; font-size: 1.05rem; }
+      .overlay h3 { margin: 0 0 .3rem; font-size: 1.05rem; font-family: var(--font-heading); }
       .overlay p { margin: 0 0 .7rem; color: var(--muted); font-size: .88rem; }
       .overlay textarea {
         flex: 1; min-height: 240px; resize: vertical; border: 1px solid var(--line);
         border-radius: 10px; padding: .7rem; font-size: 1rem; line-height: 1.6;
         background: var(--bg); color: var(--ink);
-        font-family: Georgia, "Times New Roman", serif;
+        font-family: var(--font-serif);
       }
       .overlay .row { display: flex; gap: .5rem; justify-content: flex-end; margin-top: .8rem; }
 
@@ -854,8 +902,16 @@
       @media (max-width: 560px) {
         .home-card, .words-card { padding: 1.1rem 1rem 1.3rem; }
         .quiz-card { padding: 1rem 1rem 1.15rem; }
-        .toolbar { padding: .6rem .7rem .55rem; }
+        /* 手机端工具栏：上下留白放大，左右留白和桌面同为 .9rem，
+           标题和导航不贴屏幕左边缘、不会被裁切 */
+        .toolbar { padding: .95rem .9rem .85rem; }
         .toolbar .brand { font-size: 1.22rem; }
+        /* 生成器操作行在手机上仍是一排到底：按钮不收缩、文字不换行，
+           难度标签和下拉占满剩余宽度，下拉右端和卡片内边距对齐 */
+        .gen-section .hb-actions { gap: .55rem; }
+        .gen-section #btnGenArticle { flex: none; white-space: nowrap; }
+        .gen-section .gen-level-label { margin-left: 0; flex: 1 1 auto; min-width: 0; }
+        .gen-section .gen-level-label select { flex: 1 1 auto; min-width: 0; }
         /* 导入那一行在手机上也保持三个按钮同排：不换行、收紧内边距 */
         .import-row { flex-wrap: nowrap; gap: .4rem; }
         .import-row .btn { padding: .35rem .55rem; font-size: .85rem; white-space: nowrap; }
@@ -908,7 +964,7 @@
         button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2.75rem; }
         .player-expand, .quiz-opt { min-height: 2.75rem; }
         .para-play-btn { width: 2.75rem; height: 2.75rem; vertical-align: -.88rem; }
-        .player-close, .guide-close { width: 2.75rem; height: 2.75rem; }
+        .player-close, .guide-close, .bubble-close { width: 2.75rem; height: 2.75rem; }
         .speak-btn, .example-speak { width: 2.75rem; height: 2.75rem; }
         .player-bar .pbtn { width: 2.75rem; height: 2.75rem; }
         .player-settings input[type="range"] { min-height: 2.75rem; }
@@ -920,6 +976,25 @@
     </style>
   </head>
   <body class="view-home">
+
+    <!-- 共用图标 sprite：Lucide 风格，全部 symbol 同一 24×24 viewBox、
+         同一描边（stroke-width 2、圆头圆角）/ 填充语言；页面各处只用
+         <svg class="icon"><use href="#i-…"/></svg> 引用，不再各写各的 -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+      <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3" fill="currentColor" stroke="none"/></symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24"><rect x="5" y="4" width="4.5" height="16" rx="1" fill="currentColor" stroke="none"/><rect x="14.5" y="4" width="4.5" height="16" rx="1" fill="currentColor" stroke="none"/></symbol>
+      <symbol id="i-stop" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2" fill="currentColor" stroke="none"/></symbol>
+      <symbol id="i-fromhere" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/><line x1="21" y1="5" x2="21" y2="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+      <symbol id="i-repeat" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></g></symbol>
+      <symbol id="i-volume" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></g></symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></g></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></g></symbol>
+      <symbol id="i-chevron-up" viewBox="0 0 24 24"><polyline points="6 15 12 9 18 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-chevron-down" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></g></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-sparkles" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></g></symbol>
+    </svg>
 
     <div class="toolbar" id="siteHeader">
       <div class="title-row">
@@ -938,7 +1013,7 @@
       </div>
       <div class="import-row article-only">
         <button class="btn primary" id="btnFile" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <svg class="icon" aria-hidden="true"><use href="#i-upload"></use></svg>
           导入 .txt
         </button>
         <input type="file" id="fileInput" accept=".txt,.text,.md,text/plain" hidden />
@@ -956,7 +1031,7 @@
             <div class="hb-head"><h3>今日 30 词</h3></div>
             <p class="hb-note" id="todayNote"></p>
             <div class="hb-actions">
-              <button class="btn primary" id="btnHomeWords" type="button">去学习</button>
+              <button class="btn primary" id="btnHomeWords" type="button">学习</button>
             </div>
           </section>
 
@@ -964,7 +1039,7 @@
             <div class="hb-head"><h3>临时小测</h3></div>
             <p class="hb-note">从已经发过的词里随机抽 20 个，一题一张卡片：正面选一个中文意思，选完翻到背面看对错，再翻回来就是下一题，全部答完在卡片上出正确率和大概的熟练等级，还会按正确率建议一个生成文章的难度：正确率越高，建议的生词率越高，点一下就能按那个难度生成一篇。不认识的题可以跳过，按未答计。建议只影响那一次生成，不改难度下拉、也不保存成绩，关掉页面就没了。</p>
             <div class="hb-actions">
-              <button class="btn primary" id="btnSelfTest" type="button">开始小测</button>
+              <button class="btn primary" id="btnSelfTest" type="button">测试</button>
             </div>
             <div class="selftest-area" id="selfTestArea"></div>
           </section>
@@ -975,6 +1050,10 @@
             <div class="story-list" id="storyList"></div>
           </section>
 
+          <div class="home-import-actions">
+            <button class="btn primary" id="btnHomeImport" type="button">去文章页导入自己的文章</button>
+          </div>
+
           <section class="home-block gen-section" aria-label="随机生成文章">
             <div class="gen-card" id="genCard">
               <div class="gen-head">
@@ -984,7 +1063,7 @@
               <p class="gen-test-suggest" id="genTestSuggest" hidden></p>
               <p class="hb-note">随机生成器：从 850 词和一份扩展高频词里现编一篇文章，难度自己选。生成的文章不占上面的短文阶梯，文末有 4 道小题。这里的 L 按生词率分档（L1 生词率 0%，只用最基础的词写），和上面短文的 Level 不是一把尺：短文的 Level 按 850 词表外的词占比分档，读到不认识的词点一下就能查。做完上面的临时小测，这里也会按那次正确率给出建议难度。</p>
               <div class="hb-actions">
-                <button class="btn primary" id="btnGenArticle" type="button">✦ 随机生成一篇</button>
+                <button class="btn primary" id="btnGenArticle" type="button"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"></use></svg>随机生成一篇</button>
                 <label class="gen-level-label">难度
                   <select id="genLevelSel" aria-label="生成难度">
                     <option value="auto">自动</option>
@@ -997,20 +1076,16 @@
                 </label>
               </div>
             </div>
-            <div class="hb-actions">
-              <button class="btn primary" id="btnHomeRead" type="button">开始读</button>
-              <button class="btn" id="btnHomeImport" type="button">去文章页导入自己的文章</button>
-            </div>
           </section>
         </div>
 
         <div class="guide article-only" id="guideBar">
-          <p>三步开始：<strong>点词</strong>查中文意思 → 点段首 <strong>▶</strong> 从本段开始读，读法看播放模式：播放器设置里的<strong>循环按钮</strong>在「全文顺序」和「单段复读」之间切换——全文顺序从这里往下读、读到文末绕回开头；单段复读只循环当前这一段，正在复读时点循环按钮就能切回全文顺序；点播放器里的段落标记「第一段、第二段…」跳到那一段开始读（按当前模式） → 查过的词会标黄，并自动进复习队列，在「今日复习」里翻卡片复习。</p>
-          <button class="guide-close" id="btnGuideClose" type="button" aria-label="关闭引导">✕</button>
+          <p>三步开始：<strong>点词</strong>查中文意思 → 点段首 <svg class="icon icon-14" aria-hidden="true"><use href="#i-play"></use></svg> 从本段开始读，读法看播放模式：播放器设置里的<strong>循环按钮</strong>在「全文顺序」和「单段复读」之间切换——全文顺序从这里往下读、读到文末绕回开头；单段复读只循环当前这一段，正在复读时点循环按钮就能切回全文顺序；点播放器里的段落标记「第一段、第二段…」跳到那一段开始读（按当前模式） → 查过的词会标黄，并自动进复习队列，在「今日复习」里翻卡片复习。</p>
+          <button class="guide-close" id="btnGuideClose" type="button" aria-label="关闭引导"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg></button>
         </div>
         <div class="review-entry article-only">
           <button class="btn review-btn" id="btnReview" type="button">今日复习 <strong id="reviewDue">0</strong> 词</button>
-          <button class="btn" id="btnGuideShow" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>提示</button>
+          <button class="btn" id="btnGuideShow" type="button"><svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>提示</button>
           <span class="review-note" id="reviewNote"></span>
         </div>
         <div class="reader-tools article-only" role="group" aria-label="阅读工具">
@@ -1053,14 +1128,14 @@
         <div class="playbar" role="group" aria-label="朗读控制">
           <div class="transport">
             <button class="pbtn main" id="btnPlay" type="button" aria-label="朗读 / 暂停">
-              <svg id="icoPlay" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
-              <svg id="icoPause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="5" y="4" width="4.5" height="16" rx="1"/><rect x="14.5" y="4" width="4.5" height="16" rx="1"/></svg>
+              <svg id="icoPlay" class="icon" aria-hidden="true"><use href="#i-play"></use></svg>
+              <svg id="icoPause" class="icon" aria-hidden="true" style="display:none"><use href="#i-pause"></use></svg>
             </button>
           </div>
           <span class="player-status" id="playerStatus">准备朗读</span>
           <button class="player-expand" id="btnPlayerExpand" type="button" aria-expanded="false" aria-controls="playerSettings">
             设置
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 15 12 9 18 15"/></svg>
+            <svg class="icon icon-14" aria-hidden="true"><use href="#i-chevron-up"></use></svg>
           </button>
         </div>
         <div class="player-paras" id="playerParas" hidden>
@@ -1068,13 +1143,13 @@
         </div>
         <div class="player-settings" id="playerSettings" hidden>
           <button class="pbtn" id="btnStop" type="button" aria-label="停止朗读">
-            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+            <svg class="icon" aria-hidden="true"><use href="#i-stop"></use></svg>
           </button>
           <button class="pbtn" id="btnFromHere" type="button" aria-label="从选中的句子开始朗读" title="从选中的句子开始朗读">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/><line x1="21" y1="5" x2="21" y2="19"/></svg>
+            <svg class="icon" aria-hidden="true"><use href="#i-fromhere"></use></svg>
           </button>
           <button class="pbtn" id="btnLoop" type="button" aria-label="播放模式：全文顺序（点按切换到单段复读）" aria-pressed="false" title="播放模式：全文顺序（点按切换到单段复读）">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+            <svg class="icon" aria-hidden="true"><use href="#i-repeat"></use></svg>
           </button>
           <label class="rate-label">语速
             <input type="range" id="rate" min="0.6" max="1.4" step="0.1" value="0.9" />
@@ -1083,7 +1158,7 @@
           <label class="voice-label" id="voiceLabel">声音
             <select id="voiceSel" aria-label="选择朗读声音"></select>
           </label>
-          <button class="player-close" id="btnClosePlayer" type="button" aria-label="关闭播放器">✕</button>
+          <button class="player-close" id="btnClosePlayer" type="button" aria-label="关闭播放器"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg></button>
         </div>
       </div>
     </div>
@@ -1105,14 +1180,14 @@
         <div class="review-top">
           <h3 id="reviewTitle">今日复习</h3>
           <span class="review-progress" id="reviewProgress"></span>
-          <button class="guide-close" id="btnReviewClose" type="button" aria-label="关闭复习">✕</button>
+          <button class="guide-close" id="btnReviewClose" type="button" aria-label="关闭复习"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg></button>
         </div>
         <div class="review-flip" id="reviewFlip" tabindex="0" role="button" aria-label="复习卡片：点按翻面，正面是单词，背面是释义">
           <div class="review-flip-inner">
             <div class="review-face review-face-front">
               <div class="review-word" id="reviewWord"></div>
               <button class="speak-btn" id="btnReviewSpeak" type="button" aria-label="朗读这个单词">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+                <svg class="icon" aria-hidden="true"><use href="#i-volume"></use></svg>
               </button>
               <p class="review-flip-hint">点卡片翻面看释义</p>
             </div>
@@ -1130,7 +1205,7 @@
 
     <div class="word-bubble below" id="wordBubble" role="dialog" aria-label="单词释义" aria-hidden="true">
       <span class="bubble-tail" aria-hidden="true"></span>
-      <button class="bubble-close" id="bubbleClose" type="button" aria-label="关闭释义">✕</button>
+      <button class="bubble-close" id="bubbleClose" type="button" aria-label="关闭释义"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg></button>
       <div class="bubble-scroll" id="bubbleBody"></div>
     </div>
 
@@ -1484,8 +1559,9 @@
         });
       }
 
-      var PLAY_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="7 4 20 12 7 20"/></svg>';
-      var PAUSE_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5.5" y="4" width="4.5" height="16" rx="1"/><rect x="14" y="4" width="4.5" height="16" rx="1"/></svg>';
+      /* 段首播放/暂停与播放器主按钮共用 sprite 里的同一份定义（#i-play / #i-pause） */
+      var PLAY_SVG = '<svg class="icon" aria-hidden="true"><use href="#i-play"></use></svg>';
+      var PAUSE_SVG = '<svg class="icon" aria-hidden="true"><use href="#i-pause"></use></svg>';
 
       function loadText(raw, title, sampleIdx, storyId, genQuiz) {
         stopSpeak();
@@ -2672,7 +2748,7 @@
         html += '<div class="word-head"><span class="word">' + esc(word) + '</span>' +
           (phonetic ? '<span class="phonetic">' + esc(phonetic) + '</span>' : '') +
           '<button type="button" class="speak-btn" id="btnSpeakWord" aria-label="朗读单词">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>' +
+          '<svg class="icon" aria-hidden="true"><use href="#i-volume"></use></svg>' +
           '</button></div>';
 
         html += zhHTML(word, state.currentZh);
@@ -2710,7 +2786,7 @@
                 examples.push(d.example);
                 more += '<div class="example-row"><p class="example">\u201c' + esc(d.example) + '\u201d</p>' +
                   '<button type="button" class="example-speak" data-ex="' + exIdx + '" aria-label="朗读例句" title="朗读例句">' +
-                  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>' +
+                  '<svg class="icon" aria-hidden="true"><use href="#i-volume"></use></svg>' +
                   '</button></div>';
               }
             });
@@ -3002,7 +3078,7 @@
           head.innerHTML = '<span class="wgroup-name">' + esc(g.name) + '</span>' +
             '<span class="wgroup-en">' + esc(g.en) + '</span>' +
             '<span class="wgroup-meta">' + g.words.length + ' 个词</span>' +
-            '<span class="wgroup-chev" aria-hidden="true">▾</span>';
+            '<svg class="wgroup-chev icon icon-16" aria-hidden="true"><use href="#i-chevron-down"></use></svg>';
           var body = document.createElement('div');
           body.className = 'wgroup-body';
           var items = [];
@@ -3168,8 +3244,8 @@
       function renderToday() {
         var words = todayBatchWords();
         $('todayNote').textContent = words.length
-          ? '今天这批是 ' + words[0] + ' 到 ' + words[words.length - 1] + '。点「去学习」跳到词表，点词查义就行。'
-          : '点「去学习」跳到词表，点词查义就行。';
+          ? '今天这批是 ' + words[0] + ' 到 ' + words[words.length - 1] + '。点「学习」跳到词表，点词查义就行。'
+          : '点「学习」跳到词表，点词查义就行。';
       }
 
       /* 展开词表里含今日这批词的组，返回第一个词的行（没有则 null） */
@@ -3186,7 +3262,7 @@
         return target;
       }
 
-      /* 「去学习」：跳到词表视图，定位到今天这 30 个词 */
+      /* 「学习」：跳到词表视图，定位到今天这 30 个词 */
       function goToTodayWords() {
         var search = $('wordsSearch');
         if (search.value) {
@@ -3279,7 +3355,7 @@
           var html = '<p class="selftest-progress">第 ' + (idx + 1) + ' / ' + questions.length + ' 题</p>' +
             '<div class="selftest-word-row"><p class="selftest-word-big">' + esc(q.word) + '</p>' +
             '<button type="button" class="speak-btn" id="stSpeak" aria-label="朗读单词">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>' +
+            '<svg class="icon" aria-hidden="true"><use href="#i-volume"></use></svg>' +
             '</button></div>' +
             '<div class="selftest-opts">';
           q.options.forEach(function (op, oi) {
@@ -3298,7 +3374,9 @@
           var right = pickedOi === q.answer;
           if (right) score++;
           if (pickedOi === null) skipped++; /* 跳过按未答计，成绩里会注明 */
-          var verdict = pickedOi === null ? '这题跳过了' : right ? '✔' : '✘';
+          var verdict = pickedOi === null ? '这题跳过了' : right
+            ? '<svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg>'
+            : '<svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg>';
           var html = '<p class="selftest-verdict ' + (right ? 'right' : 'wrong') + (pickedOi === null ? '' : ' is-mark') + '"' +
             (pickedOi === null ? '' : ' role="img" aria-label="' + (right ? '答对了' : '答错了') + '"') + '>' + verdict + '</p>' +
             '<p class="selftest-back-word">' + esc(q.word) + '</p>' +
@@ -3536,8 +3614,6 @@
       function updateDashboard() {
         if (!$('storyNote')) return;
         $('storyNote').textContent = '内置 5 篇短文（自编，150–250 词），按 850 词表外的生词率分 Level 1 / 2 / 3，按顺序读：每篇末尾 3 道题，答对至少 2 题算读完，解锁下一篇。';
-        var nx = nextStory();
-        $('btnHomeRead').textContent = nx ? ('开始读：' + nx.title) : '再读第一篇';
         renderStoryList();
         renderGenCard();
       }
@@ -3575,9 +3651,6 @@
 
       $('btnHomeWords').addEventListener('click', function () { goToTodayWords(); });
       $('btnHomeImport').addEventListener('click', function () { setView('article'); });
-      $('btnHomeRead').addEventListener('click', function () {
-        openStory(nextStory() || STORIES[0]);
-      });
 
       /* ---------------- review session ----------------
          翻卡片复习：正面是单词，单词下面有语音按钮；点卡片翻到背面看释义，
@@ -4431,7 +4504,7 @@ function genGenerate(level, env) {
         var picked = {};
         var graded = false;
         var html = '<div class="quiz-gen-head"><h3 class="quiz-title">读完做四道题（选填）</h3>' +
-          '<button type="button" class="btn" id="btnGenAgain">✦ 换一篇</button></div>';
+          '<button type="button" class="btn" id="btnGenAgain"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"></use></svg>换一篇</button></div>';
         gen.quiz.forEach(function (q, qi) {
           html += '<div class="quiz-q"><p class="quiz-q-text"><span class="quiz-kind">' + (qi + 1) + '.</span>' + esc(q.q) + '</p><div class="quiz-opts">';
           q.options.forEach(function (op, oi) {
