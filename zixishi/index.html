@@ -820,7 +820,7 @@
       .gen-test-suggest span { flex: 1 1 13rem; }
 
       /* ---------- adaptive article generator (#15) ---------- */
-      .gen-card { border: 1px dashed var(--line); border-radius: 12px; padding: .85rem .95rem .95rem; margin-top: .95rem; }
+      .gen-card { margin-top: .95rem; }
       /* 生成器已拆成「推荐短文」下方的独立板块：板块本身带顶边距，卡片不再叠加上边距 */
       .gen-section .gen-card { margin-top: 0; }
       /* 生成器操作行收整：生成按钮和难度下拉固定同一排、垂直居中，
@@ -1101,7 +1101,7 @@
               <p class="gen-test-suggest" id="genTestSuggest" hidden></p>
               <p class="hb-note">随机生成器：从 850 词和一份扩展高频词里现编一篇文章，难度自己选。生成的文章不占上面的短文阶梯，文末有 4 道小题。这里的 L 按生词率分档（L1 生词率 0%，只用最基础的词写），和上面短文的 Level 不是一把尺：短文的 Level 按 850 词表外的词占比分档，读到不认识的词点一下就能查。做完上面的临时小测，这里也会按那次正确率给出建议难度。</p>
               <div class="hb-actions">
-                <button class="btn primary" id="btnGenArticle" type="button"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"></use></svg>生成</button>
+                <button class="btn primary" id="btnGenArticle" type="button">生成</button>
                 <label class="gen-level-label">难度
                   <select id="genLevelSel" aria-label="生成难度">
                     <option value="auto">自动</option>
@@ -4705,5 +4705,6 @@ function genGenerate(level, env) {
       setView('home');
     })();
     </script>
+    <script data-goatcounter="https://leionway.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
   </body>
 </html>
