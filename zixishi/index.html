@@ -17,12 +17,15 @@
         --line: #e2dac8;
         --accent: #b03a26;
         --accent-soft: #f7e3dc;
-        --hl: #fcefc6;
+        /* 语音高亮（跟读 / 句读正在读的句子）和播放按钮同色：用强调色浅底，
+           不用黄色，免得和生词标注（--word-new 的黄色）重合看混 */
+        --hl: var(--accent-soft);
         --word-hover: #f6e7d2;
         --word-sel: #f3c98b;
         --word-new: #ffdf7e;
         --chip: #efe8d8;
         --shadow: 0 10px 30px rgba(60, 45, 20, .14);
+        --hl-loop: color-mix(in srgb, var(--accent-soft) 60%, var(--accent) 40%);
         --reader-size: 1.16rem;
         /* ---------- 字体分工（报纸风：英文衬线 / 中文无衬线，不引入外部字体文件） ----------
            --font-serif：英文内容用——阅读正文、词头、单词、短文与文章标题、品牌字；
@@ -46,7 +49,8 @@
           --line: #35363d;
           --accent: #e2704f;
           --accent-soft: #3d2620;
-          --hl: #57451c;
+          --hl: var(--accent-soft);
+          --hl-loop: color-mix(in srgb, var(--accent-soft) 60%, var(--accent) 40%);
           --word-hover: #2e2b25;
           --word-sel: #7a5a1e;
           --word-new: #6e5518;
@@ -64,11 +68,12 @@
         --line: #e2dac8;
         --accent: #b03a26;
         --accent-soft: #f7e3dc;
-        --hl: #fcefc6;
+        --hl: var(--accent-soft);
         --word-hover: #f6e7d2;
         --word-sel: #f3c98b;
         --word-new: #ffdf7e;
         --chip: #efe8d8;
+        --hl-loop: color-mix(in srgb, var(--accent-soft) 60%, var(--accent) 40%);
         --shadow: 0 10px 30px rgba(60, 45, 20, .14);
       }
       html[data-theme="eye"] {
@@ -79,7 +84,8 @@
         --line: #bccfb2;
         --accent: #3a7d2c;
         --accent-soft: #d3e8c3;
-        --hl: #fdf0a6;
+        --hl: var(--accent-soft);
+        --hl-loop: color-mix(in srgb, var(--accent-soft) 60%, var(--accent) 40%);
         --word-hover: #ddebd2;
         --word-sel: #a9d18a;
         --word-new: #ffdf7e;
@@ -94,11 +100,12 @@
         --line: #35363d;
         --accent: #e2704f;
         --accent-soft: #3d2620;
-        --hl: #57451c;
+        --hl: var(--accent-soft);
         --word-hover: #2e2b25;
         --word-sel: #7a5a1e;
         --word-new: #6e5518;
         --chip: #28261f;
+        --hl-loop: color-mix(in srgb, var(--accent-soft) 60%, var(--accent) 40%);
         --shadow: 0 10px 30px rgba(0, 0, 0, .5);
       }
       html[data-theme="paper"] .btn.primary,
@@ -189,12 +196,16 @@
       }
 
       /* ---------- playback (bottom player, hidden until first play click) ----------
-         平时只占一行小条：播放/暂停 + 进度 + 「设置」展开按钮；
-         停止、从选中句读、语速、声音、关闭都收进展开的设置区。 */
+         平时只占一行小条：播放/暂停 + 进度文字；
+         触屏在小条上上滑拉出设置区、下滑收回，桌面点进度文字展开 / 收起；
+         停止、下一段、全读、句读、语速、声音、关闭都收进设置区。 */
       .player-bar {
         position: fixed; left: 0; right: 0; bottom: 0; z-index: 70;
         background: var(--paper); border-top: 1px solid var(--line);
         box-shadow: 0 -8px 28px rgba(40, 30, 10, .16);
+        /* 纵向滑动由播放器自己接管（上滑拉出设置 / 下滑收回），不带动正文滚动；
+           横向仍放行，给段落标记条留横滑 */
+        touch-action: pan-x;
         padding: .45rem .9rem calc(.45rem + env(safe-area-inset-bottom));
         transform: translateY(calc(100% + 12px)); visibility: hidden;
         transition: transform .25s ease, visibility 0s linear .25s;
@@ -208,25 +219,25 @@
       body.player-visible.player-expanded .layout { padding-bottom: 9rem; }
       .playbar { display: flex; align-items: center; gap: .6rem; }
       .playbar .transport { display: flex; align-items: center; gap: .45rem; flex: none; }
+      /* 状态文字兼作展开入口（桌面端点它展开 / 收起设置），保持低调：
+         不加边框底色，只在悬停 / 聚焦时变强调色 */
       .player-status {
         flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;
         font-size: .83rem; color: var(--muted); white-space: nowrap;
         font-variant-numeric: tabular-nums;
+        cursor: pointer; border-radius: 4px;
       }
-      .player-expand {
-        appearance: none; flex: none; display: inline-flex; align-items: center; gap: .3rem;
-        border: 1px solid var(--line); background: var(--paper); color: var(--ink);
-        border-radius: 999px; padding: .35rem .8rem; min-height: 2.25rem;
-        font-size: .9rem; cursor: pointer;
-      }
-      .player-expand:hover { border-color: var(--accent); color: var(--accent); }
-      .player-expand svg { width: 14px; height: 14px; flex: none; transition: transform .2s ease; }
-      .player-bar.expanded .player-expand svg { transform: rotate(180deg); }
+      .player-status:hover { color: var(--accent); }
+      .player-status:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      /* 设置区外层裁剪盒：高度由展开逻辑 / 上滑手势驱动，实现拉出与跟手 */
+      .player-settings-clip { overflow: hidden; height: 0; transition: height .25s ease; }
+      .player-bar.swipe-drag .player-settings-clip { transition: none; }
       .player-settings {
         display: flex; flex-wrap: wrap; align-items: center; gap: .55rem 1rem;
         margin-top: .5rem; padding-top: .55rem; border-top: 1px dashed var(--line);
       }
       .player-settings[hidden] { display: none; }
+      .player-settings input[type="range"] { touch-action: none; }
       /* 关闭按钮全站统一：同一个圆形容器（2.25rem，触屏 2.75rem）、同一图标尺寸，
          .player-close / .guide-close / .bubble-close 三处共用这套规格 */
       .player-close {
@@ -244,8 +255,26 @@
       .player-bar .pbtn.main { background: var(--accent); border-color: var(--accent); color: #fff; width: 2.8rem; height: 2.8rem; }
       @media (prefers-color-scheme: dark) { .player-bar .pbtn.main { color: #181410; } }
       .player-bar .pbtn svg { width: 18px; height: 18px; }
-      .player-bar .pbtn.loop-off { opacity: .45; }
       .player-bar .pbtn.main svg { width: 18px; height: 18px; }
+      .player-bar .pbtn:disabled { opacity: .45; cursor: default; }
+      .player-bar .pbtn:disabled:hover { border-color: var(--line); }
+      /* 带文字的胶囊开关（「句读」「全读」共用）：选中态填充强调色 + 白字加粗，
+         一眼能看出开没开，和段落标记选中态同一套配色 */
+      .player-bar .pbtn-text {
+        appearance: none; flex: none; border: 1px solid var(--line); background: var(--paper);
+        color: var(--ink); border-radius: 999px; padding: .35rem .95rem; min-height: 2.5rem;
+        font-size: .9rem; cursor: pointer; line-height: 1.3;
+      }
+      .player-bar .pbtn-text:hover { border-color: var(--accent); color: var(--accent); }
+      .player-bar .pbtn-text.is-active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+      .player-bar .pbtn-text.is-active:hover { color: #fff; }
+      @media (prefers-color-scheme: dark) { .player-bar .pbtn-text.is-active { color: #181410; } }
+      html[data-theme="paper"] .player-bar .pbtn-text.is-active,
+      html[data-theme="eye"] .player-bar .pbtn-text.is-active { color: #fff; }
+      html[data-theme="night"] .player-bar .pbtn-text.is-active { color: #181410; }
+      /* 禁用时（如句读模式下禁用「全读」）置灰，和图标按钮的禁用规格一致 */
+      .player-bar .pbtn-text:disabled { opacity: .45; cursor: default; }
+      .player-bar .pbtn-text:disabled:hover { border-color: var(--line); }
       .player-settings label { font-size: .8rem; color: var(--muted); display: flex; align-items: center; gap: .5rem; }
       .player-settings label.rate-label { flex: 0 1 13rem; }
       .player-settings label.voice-label { flex: 0 1 15rem; }
@@ -272,8 +301,8 @@
       .fontsize button:hover { color: var(--accent); }
 
       /* ---------- 播放器里的段落标记：第一段 / 第二段… ----------
-         点段号跳到那一段开始读，走当前播放模式（循环按钮切换：
-         全文顺序 / 单段复读），没有单独的「全文」按钮。
+         点段号跳到那一段开始读，走「全读」开关：开就从那段往下读、
+         读到全文结尾自动从头循环，关就只读那一段。
          一行横排、段多时横向滑动，正在读的段自动滚到中间并高亮。 */
       .player-paras {
         display: flex; align-items: center;
@@ -956,7 +985,7 @@
         .toast { z-index: 100; }
       }
       @media (prefers-reduced-motion: reduce) {
-        #reader .sent, .toast, .player-bar, .toolbar, .player-expand svg, .word-bubble, .review-flip-inner, .selftest-flip-inner { transition: none; }
+        #reader .sent, .toast, .player-bar, .toolbar, .player-settings-clip, .word-bubble, .review-flip-inner, .selftest-flip-inner { transition: none; }
       }
 
       /* ---------- 窄屏专项 (≤560px，覆盖 360–390px 手机) ---------- */
@@ -1033,7 +1062,7 @@
       /* ---------- 触屏：点击目标 ≥44px；表单字号 16px，防 iOS 聚焦自动放大 ---------- */
       @media (pointer: coarse) {
         button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2.75rem; }
-        .player-expand, .quiz-opt { min-height: 2.75rem; }
+        .quiz-opt { min-height: 2.75rem; }
         .para-play-btn { width: 2.75rem; height: 2.75rem; vertical-align: -.88rem; }
         .player-close, .guide-close, .bubble-close { width: 2.75rem; height: 2.75rem; }
         .speak-btn, .example-speak { width: 2.75rem; height: 2.75rem; }
@@ -1055,7 +1084,6 @@
       <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3" fill="currentColor" stroke="none"/></symbol>
       <symbol id="i-pause" viewBox="0 0 24 24"><rect x="5" y="4" width="4.5" height="16" rx="1" fill="currentColor" stroke="none"/><rect x="14.5" y="4" width="4.5" height="16" rx="1" fill="currentColor" stroke="none"/></symbol>
       <symbol id="i-stop" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2" fill="currentColor" stroke="none"/></symbol>
-      <symbol id="i-fromhere" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/><line x1="21" y1="5" x2="21" y2="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
       <symbol id="i-repeat" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></g></symbol>
       <symbol id="i-volume" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></g></symbol>
       <symbol id="i-upload" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></g></symbol>
@@ -1174,7 +1202,7 @@
             </div>
           </div>
           <div class="guide article-only" id="guideBar">
-          <p>三步开始：<strong>点词</strong>查中文意思 → 点段首 <svg class="icon icon-14" aria-hidden="true"><use href="#i-play"></use></svg> 从本段开始读，读法看播放模式：播放器设置里的<strong>循环按钮</strong>在「全文顺序」和「单段复读」之间切换——全文顺序从这里往下读、读到文末绕回开头；单段复读只循环当前这一段，正在复读时点循环按钮就能切回全文顺序；点播放器里的段落标记「第一段、第二段…」跳到那一段开始读（按当前模式） → 查过的词会标黄，并自动进复习队列，在「今日复习」里翻卡片复习。</p>
+          <p>三步开始：<strong>点词</strong>查中文意思 → 点段首 <svg class="icon icon-14" aria-hidden="true"><use href="#i-play"></use></svg> 从本段开始读，读法看播放器设置里的<strong>「全读」</strong>开关：开着就从这里往下读，读到全文结尾自动从头再读、一直循环直到点停，关掉就只读当前这一段，读完就停；点任意一句只读那一句；点播放器里的段落标记「第一段、第二段…」跳到那一段开始读（同样看「全读」开关） → 查过的词会标黄，并自动进复习队列，在「今日复习」里翻卡片复习。</p>
           <button class="guide-close" id="btnGuideClose" type="button" aria-label="关闭引导"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg></button>
         </div>
         <div class="review-entry article-only">
@@ -1227,25 +1255,19 @@
               <svg id="icoPause" class="icon" aria-hidden="true" style="display:none"><use href="#i-pause"></use></svg>
             </button>
           </div>
-          <span class="player-status" id="playerStatus">准备朗读</span>
-          <button class="player-expand" id="btnPlayerExpand" type="button" aria-expanded="false" aria-controls="playerSettings">
-            设置
-            <svg class="icon icon-14" aria-hidden="true"><use href="#i-chevron-up"></use></svg>
-          </button>
+          <span class="player-status" id="playerStatus" role="button" tabindex="0" aria-expanded="false" aria-controls="playerSettings" title="点按展开 / 收起播放设置；触屏可在播放器上上滑拉出、下滑收回">准备朗读</span>
         </div>
         <div class="player-paras" id="playerParas" hidden>
           <div class="player-paras-scroll" id="playerParasScroll" role="group" aria-label="段落导航：点段号从那一段开始播放"></div>
         </div>
+        <div class="player-settings-clip" id="playerSettingsClip">
         <div class="player-settings" id="playerSettings" hidden>
           <button class="pbtn" id="btnStop" type="button" aria-label="停止朗读">
             <svg class="icon" aria-hidden="true"><use href="#i-stop"></use></svg>
           </button>
-          <button class="pbtn" id="btnFromHere" type="button" aria-label="从选中的句子开始朗读" title="从选中的句子开始朗读">
-            <svg class="icon" aria-hidden="true"><use href="#i-fromhere"></use></svg>
-          </button>
-          <button class="pbtn" id="btnLoop" type="button" aria-label="播放模式：全文顺序（点按切换到单段复读）" aria-pressed="false" title="播放模式：全文顺序（点按切换到单段复读）">
-            <svg class="icon" aria-hidden="true"><use href="#i-repeat"></use></svg>
-          </button>
+          <button class="pbtn-text" id="btnNextPara" type="button" aria-label="下一段：跳到下一段开头接着读" title="跳到下一段开头接着读，不受全读与句读控制">下一段</button>
+          <button class="pbtn-text" id="btnFullRead" type="button" aria-pressed="true" aria-label="全读开：全文循环播放，读到结尾自动从头再读（点按关闭，改为只读当前段落）" title="全读开：全文循环播放，读到结尾自动从头再读（点按关闭，改为只读当前段落）">全读</button>
+          <button class="pbtn-text" id="btnSentence" type="button" aria-pressed="false" aria-label="句读模式：点正文里的句子只读那一句" title="句读：点正文里的句子只读那一句，点单词也算点句；查词改成长按或双击单词">句读</button>
           <label class="rate-label">语速
             <input type="range" id="rate" min="0.6" max="1.4" step="0.1" value="0.9" />
             <span class="rate-val" id="rateVal">0.9×</span>
@@ -1254,6 +1276,7 @@
             <select id="voiceSel" aria-label="选择朗读声音"></select>
           </label>
           <button class="player-close" id="btnClosePlayer" type="button" aria-label="关闭播放器"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg></button>
+        </div>
         </div>
       </div>
     </div>
@@ -2105,15 +2128,17 @@
         playIdx: 0,
         playStart: 0,         // 本次朗读的起始句：只读一段 / 一句时进度按这个范围算分母
         playLimit: -1,
-        repeatPara: false,    // 本次朗读是否单段复读：由当前播放模式（playMode）在 playFrom 时决定，读到本段末句不往下走，绕回本段第一句接着读，直到暂停 / 停止；播放中点循环按钮切换模式时同步改（见 applyPlayModeToSession）
-        repeatStart: -1,      // 复读时绕回的起始句（本段第一句）
+        repeatPara: false,    // 旧的单段复读标记：已无播放入口会置真（循环按钮已由「全读」开关代替，见 fullRead），仅保留字段供 playFrom / 续播路径兼容，恒为 false
+        repeatStart: -1,      // 同上，恒为 -1
         speakSeq: 0,          // 跟读推进令牌：onend 与「按句长估算」推进共用，防重复跳句 (#12)
         speakTimer: null,
         speakWatch: null,     // 出声看护计时器：speak 后迟迟没 onstart 就重发 / 停住，防静默吞句
         speakRetry: 0,        // 当前句已重发次数（最多重发 1 次，再不行就停在当前句提示）
         activePara: -1,
         rate: typeof prefs.rate === 'number' ? prefs.rate : 0.9,
-        playMode: prefs.playMode === 'repeat' ? 'repeat' : 'seq',   // 播放模式：'seq' 全文顺序（默认，从起点往下读、读到文末绕回第一句）/ 'repeat' 单段复读（只循环一段）；播放器设置里的循环按钮就是这个开关，所有播放入口都按它走
+        fullRead: typeof prefs.fullRead === 'boolean' ? prefs.fullRead : prefs.playMode !== 'repeat',   // 「全读」开关（播放器设置里带文字的胶囊按钮，代替旧的循环图标按钮）：开（默认）= 全文循环播放，从当前处顺序读到全文结尾后自动从头再读、一直循环直到点停；关 = 段落播放，只读当前段落一遍、读完就停。所有播放入口都按它走，选择存偏好（prefs.fullRead）；旧偏好 playMode 在此迁移：'seq' → 开、'repeat' → 关
+        sentenceMode: false,  // 句读模式（播放器设置里的「句读」按钮）：开启时盖过「全读」开关——全文 / 段落播放都关掉，只留点句播放：点正文任意一句（点在单词上也算）只读那一句、不查词，查词改走长按 / 双击；关掉句读就回到开启前的全读开关状态（开启时并不改 fullRead 本身，所以无需另存恢复）。只在本次打开期间有效，不存偏好
+        pendingHlIdx: -1,     // 句读模式下已点、但还没确认出声的句子：高亮等 issueUtterance 的 onstart 确认出声后才挂（见 speakCurrent / issueUtterance），出声失败就清掉，不留「亮着没声」
         voice: null,
         wordStatus: lsLoad(LS_STATUS, {}),      // lemma -> 'new'（查过的词上色）
         review: lsLoad(LS_REVIEW, {}),          // lemma -> {next:'YYYY-MM-DD', step:0..4, sent, gloss}
@@ -2329,8 +2354,8 @@
           });
           block.appendChild(pEl);
 
-          /* 段首一个 ▶ 圆按钮：从本段开始顺序往下读（播放器默认模式），
-             正在读本段时再点是暂停 / 继续；走顺序还是复读看当前播放模式 */
+          /* 段首一个 ▶ 圆按钮：从本段开始读，
+             正在读本段时再点是暂停 / 继续；读到全文结束还是只读本段看「全读」开关 */
           var playBtn = document.createElement('button');
           playBtn.type = 'button';
           playBtn.className = 'para-play-btn';
@@ -2434,19 +2459,91 @@
         if (el) el.classList.add('sel');
       }
 
+      /* 句读模式下长按查词：长按成立后紧跟的那次 click 不能再当点句播放，
+         用这个时间戳把那次 click 吞掉（见下方 click 处理开头） */
+      var lpSuppressUntil = 0;
+
       readerEl.addEventListener('click', function (e) {
+        if (lpSuppressUntil && Date.now() < lpSuppressUntil) { lpSuppressUntil = 0; return; }
         var w = e.target.closest ? e.target.closest('.w') : null;
         var sentEl = e.target.closest ? e.target.closest('.sent') : null;
+        if (state.sentenceMode) {
+          /* 句读模式：点句子的任何地方（点在单词上也一样）都只算点句——
+             只读这一句一次，不触发查词、不加选中高亮；正在读的句子高亮
+             等确认出声后才挂（见 speakCurrent / issueUtterance）。
+             点正在读的这一句是暂停 / 继续。查词走长按 / 双击（见下方）。 */
+          if (!sentEl) return;
+          var sIdx = parseInt(sentEl.dataset.idx, 10);
+          if (state.playing && state.playStart === sIdx && state.playLimit === sIdx) {
+            if (state.paused) resumeSpeak(); else pauseSpeak();
+            return;
+          }
+          playFrom(sIdx, sIdx);
+          return;
+        }
         if (w) {
           if (sentEl) selectSentence(parseInt(sentEl.dataset.idx, 10), false);
           selectWord(w);
           lookupWord(w.dataset.word, w);
         } else if (sentEl) {
-          /* 点在句子上、没点中单词：只读这一句，读完就停 (#12) */
           var idx = parseInt(sentEl.dataset.idx, 10);
           selectSentence(idx, false);
+          /* 点句子：只读这一句，读完就停 (#12)，和「全读」开关无关（开关管的是
+             主按钮 / 段首 ▶ / 段落标记这些整段整篇的入口）；点的正是正在读的
+             这一句，就是暂停 / 继续（和段首 ▶、段落标记点正在读的那段一个道理）。
+             句子本身不加任何标记，高亮只在读这一句期间有（见 markActive）。 */
+          if (state.playing && state.playStart === idx && state.playLimit === idx) {
+            if (state.paused) resumeSpeak(); else pauseSpeak();
+            return;
+          }
           playFrom(idx, idx);
         }
+      });
+
+      /* 句读模式下查词改走双击 / 长按（单击已被点句播放占用）：
+         双击一个词——先停掉两次单击已经起的点句朗读，再按平时的点词查义打开气泡；
+         长按一个词（按住约 550ms 不动）——直接查义，随后那次 click 被吞掉，不再点句。
+         非句读模式下这两个监听都不做事，点词查义还是单击。 */
+      readerEl.addEventListener('dblclick', function (e) {
+        if (!state.sentenceMode) return;
+        var w = e.target.closest ? e.target.closest('.w') : null;
+        if (!w) return;
+        var sentEl = e.target.closest ? e.target.closest('.sent') : null;
+        stopSpeak(true);
+        if (sentEl) selectSentence(parseInt(sentEl.dataset.idx, 10), false);
+        selectWord(w);
+        lookupWord(w.dataset.word, w);
+      });
+      var lpTimer = null, lpTarget = null, lpX = 0, lpY = 0;
+      function lpCancel() {
+        if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
+        lpTarget = null;
+      }
+      readerEl.addEventListener('pointerdown', function (e) {
+        if (!state.sentenceMode) return;
+        var w = e.target.closest ? e.target.closest('.w') : null;
+        if (!w) return;
+        lpTarget = w; lpX = e.clientX; lpY = e.clientY;
+        if (lpTimer) clearTimeout(lpTimer);
+        lpTimer = setTimeout(function () {
+          lpTimer = null;
+          if (!lpTarget || !state.sentenceMode) return;
+          var el = lpTarget;
+          lpSuppressUntil = Date.now() + 800;
+          var sentEl = el.closest ? el.closest('.sent') : null;
+          if (sentEl) selectSentence(parseInt(sentEl.dataset.idx, 10), false);
+          selectWord(el);
+          lookupWord(el.dataset.word, el);
+        }, 550);
+      });
+      readerEl.addEventListener('pointerup', lpCancel);
+      readerEl.addEventListener('pointercancel', lpCancel);
+      readerEl.addEventListener('pointermove', function (e) {
+        if (lpTarget && (Math.abs(e.clientX - lpX) > 10 || Math.abs(e.clientY - lpY) > 10)) lpCancel();
+      });
+      /* 长按时浏览器自带的右键菜单 / 选字菜单会抢戏，句读模式下在正文里禁掉 */
+      readerEl.addEventListener('contextmenu', function (e) {
+        if (state.sentenceMode) e.preventDefault();
       });
 
       /* ---------------- speech ---------------- */
@@ -2525,18 +2622,128 @@
       }
 
       /* Player bar lives at the bottom of the page and only appears after a play click.
-         平时是一行小条（播放/暂停 + 进度 + 设置按钮），点「设置」才展开设置区。 */
+         平时是一行小条（播放/暂停 + 进度文字）。设置区收在裁剪盒里，展开走高度动画：
+         触屏在播放器上上滑拉出、下滑收回（跟手拖动，松手按方向补完，见下方手势段）；
+         桌面点进度文字展开 / 收起。两条路共用 setPlayerExpanded。 */
+      function settingsFullHeight() {
+        var s = $('playerSettings');
+        if (!s) return 0;
+        var mt = parseFloat(window.getComputedStyle(s).marginTop) || 0;
+        return s.offsetHeight + mt;
+      }
+      var collapseHideTimer = 0;
       function setPlayerExpanded(exp) {
         var bar = $('playerBar');
         if (!bar) return;
+        var settings = $('playerSettings'), clip = $('playerSettingsClip');
         bar.classList.toggle('expanded', exp);
         document.body.classList.toggle('player-expanded', exp);
-        $('playerSettings').hidden = !exp;
-        $('btnPlayerExpand').setAttribute('aria-expanded', exp ? 'true' : 'false');
+        $('playerStatus').setAttribute('aria-expanded', exp ? 'true' : 'false');
+        if (!clip || !settings) { if (settings) settings.hidden = !exp; return; }
+        window.clearTimeout(collapseHideTimer);
+        if (exp) {
+          settings.hidden = false;
+          clip.style.height = settingsFullHeight() + 'px';
+        } else {
+          clip.style.height = '0px';
+          /* 等收起动画走完再 hidden，免得内容瞬间消失；期间重新展开则作废 */
+          collapseHideTimer = window.setTimeout(function () {
+            if (!bar.classList.contains('expanded')) settings.hidden = true;
+          }, 280);
+        }
       }
-      $('btnPlayerExpand').addEventListener('click', function () {
+      /* 桌面入口：点进度文字切换展开（触屏点按同样有效，滑动是另一条路） */
+      $('playerStatus').addEventListener('click', function () {
         setPlayerExpanded(!$('playerBar').classList.contains('expanded'));
       });
+      $('playerStatus').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setPlayerExpanded(!$('playerBar').classList.contains('expanded'));
+        }
+      });
+      /* 窗口尺寸变了设置区可能换行、高度会变，展开着就把裁剪盒高度对齐实际高度 */
+      window.addEventListener('resize', function () {
+        var bar = $('playerBar'), clip = $('playerSettingsClip');
+        if (bar && clip && bar.classList.contains('expanded') && !bar.classList.contains('swipe-drag')) {
+          clip.style.height = settingsFullHeight() + 'px';
+        }
+      });
+
+      /* ---------- 触屏滑动拉出 / 收回设置（仅触摸，鼠标不受影响） ----------
+         从播放器上起手（语速滑杆、声音选择除外，它们自己要拖）；
+         纵向位移占主导才接管，横向让给段落标记条横滑，正文滚动不受影响
+         （播放器是固定栏，纵向手势已被 CSS touch-action 与 preventDefault 拦下）。
+         拖动时裁剪盒高度跟手，松手按「位移过半」或甩动方向自动补完。
+         位移很小的轻点不拦截，播放 / 暂停、全读、句读、下一段等按钮照常点；
+         真拖动过则吞掉随之而来的那次 click，免得滑过按钮时误触。 */
+      (function () {
+        var bar = $('playerBar'), clip = $('playerSettingsClip'), settings = $('playerSettings');
+        if (!bar || !clip || !settings) return;
+        var g = null;               /* 当前手势状态 */
+        var suppressClickUntil = 0;
+
+        bar.addEventListener('click', function (e) {
+          if (Date.now() < suppressClickUntil) {
+            e.preventDefault();
+            e.stopPropagation();
+            suppressClickUntil = 0;
+          }
+        }, true);
+
+        bar.addEventListener('touchstart', function (e) {
+          if (!bar.classList.contains('show') || e.touches.length !== 1) { g = null; return; }
+          var t = e.touches[0];
+          g = {
+            startX: t.clientX, startY: t.clientY,
+            lastY: t.clientY, lastT: Date.now(), vel: 0,
+            engaged: false, dead: false,
+            wasExpanded: bar.classList.contains('expanded'),
+            fullH: 0, curH: 0,
+            blocked: !!(e.target.closest && e.target.closest('input, select, textarea'))
+          };
+        }, { passive: true });
+
+        bar.addEventListener('touchmove', function (e) {
+          if (!g || g.dead || g.blocked) return;
+          var t = e.touches[0];
+          var dx = t.clientX - g.startX, dy = t.clientY - g.startY;
+          if (!g.engaged) {
+            if (Math.abs(dy) < 10 && Math.abs(dx) < 10) return;
+            if (Math.abs(dy) <= Math.abs(dx) * 1.25) { g.dead = true; return; }
+            /* 接管：备好设置区（收起时先取消 hidden，高度仍归裁剪盒管，不会闪） */
+            g.engaged = true;
+            bar.classList.add('swipe-drag');
+            window.clearTimeout(collapseHideTimer);
+            settings.hidden = false;
+            g.fullH = settingsFullHeight();
+            g.curH = g.wasExpanded ? g.fullH : 0;
+            clip.style.height = g.curH + 'px';
+          }
+          e.preventDefault();
+          var now = Date.now(), dt = now - g.lastT;
+          if (dt > 0) g.vel = (t.clientY - g.lastY) / dt;   /* px/ms，下滑为正 */
+          g.lastY = t.clientY; g.lastT = now;
+          g.curH = Math.max(0, Math.min(g.fullH, (g.wasExpanded ? g.fullH : 0) - dy));
+          clip.style.height = g.curH + 'px';
+        }, { passive: false });
+
+        function finishGesture(commit) {
+          if (!g) return;
+          if (g.engaged) {
+            var target;
+            if (!commit) target = g.wasExpanded;
+            else if (g.wasExpanded) target = !(g.curH < g.fullH * 0.55 || g.vel > 0.35);
+            else target = (g.curH > g.fullH * 0.45 || g.vel < -0.35);
+            bar.classList.remove('swipe-drag');
+            if (Math.abs(g.lastY - g.startY) > 10) suppressClickUntil = Date.now() + 400;
+            setPlayerExpanded(target);
+          }
+          g = null;
+        }
+        bar.addEventListener('touchend', function () { finishGesture(true); });
+        bar.addEventListener('touchcancel', function () { finishGesture(false); });
+      })();
       /* 点空白收起：播放器展开时，点页面空白处（段落间空处、边距等）先收回一行小条，朗读不中断。
          点词查义、点句朗读、任何按钮/控件和播放器本身都不算空白，不受影响；
          已经是小条时点空白不做任何事，小条保留，暂停随时可点。 */
@@ -2573,9 +2780,9 @@
       }
 
       /* ---------------- 播放器里的段落标记 ----------------
-         播放器底部一条段落条：「第一段」「第二段」…，没有「全文」按钮。
-         点段号跳到那一段开始读，走当前播放模式（见 startParaPlayback）：
-         全文顺序就从那段往下读，单段复读就循环那一段；
+         播放器底部一条段落条：「第一段」「第二段」…。
+         点段号跳到那一段开始读，走「全读」开关（见 startParaPlayback）：
+         开就从那段往下读、读到结尾自动从头循环，关就只读那一段；
          点正在读的那段是暂停 / 继续。只有一段的文章不显示这条。 */
       function cnNum(n) {
         var d = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
@@ -2637,7 +2844,7 @@
         refreshParaNav();
         var el = $('playerStatus');
         if (!el) return;
-        if (!state.playing) { el.textContent = '准备朗读'; return; }
+        if (!state.playing) { el.textContent = state.sentenceMode ? '句读 · 点正文里的句子读那一句' : '准备朗读'; return; }
         var paraIdx = state.activePara >= 0 ? state.activePara : paraIndexOf(state.playIdx);
         var paraTxt = paraIdx >= 0 ? '第 ' + (paraIdx + 1) + ' 段 · ' : '';
         var txt;
@@ -2650,13 +2857,27 @@
           var total = state.sentences.length;
           txt = paraTxt + '第 ' + Math.min(state.playIdx + 1, total) + ' / ' + total + ' 句';
         }
-        var loopTxt = (state.playLimit >= 0 && state.repeatPara) ? '复读 · ' : (state.playLimit < 0 ? '顺序 · ' : '');
-        el.textContent = (state.paused ? '已暂停 · ' : '正在朗读 · ') + loopTxt + txt;
+        /* 状态前缀标出这次朗读的范围：全文（全读开）/ 当前段落（全读关）/
+           句读；只读一句时范围就是这一句，不加前缀 */
+        var scopeTxt;
+        if (state.sentenceMode) {
+          scopeTxt = '句读 · ';
+        } else if (state.playLimit < 0) {
+          scopeTxt = '全读 · ';
+        } else if (state.playLimit > state.playStart) {
+          scopeTxt = '段落 · ';
+        } else {
+          scopeTxt = '';
+        }
+        el.textContent = (state.paused ? '已暂停 · ' : '正在朗读 · ') + scopeTxt + txt;
       }
 
       function markActive(idx) {
+        /* 跟读高亮：正在读的那一句加 .active 底色，逐句移动；
+           停了走 markActive(-1)，高亮跟着消失 */
         state.sentences.forEach(function (s, i) {
           s.el.classList.toggle('active', i === idx);
+          s.el.classList.remove('looping');
         });
         /* 全文队列里，段首 ▶ 的高亮跟着当前句走：读到哪段，哪段的按钮
            显示暂停；点正在读的这段就暂停，点别的段就从那段重新排队。 */
@@ -2707,23 +2928,37 @@
       }
       function speakCurrent() {
         if (!state.playing) return;
-        /* 段落复读：读过本段末句就绕回本段第一句接着读，不往下一段走、
-           也不停，直到暂停 / 停止。放在全文到尾判断之前，最后一段也能绕。 */
-        if (state.repeatPara && state.playLimit >= 0 && state.playIdx > state.playLimit) {
-          state.playIdx = state.repeatStart;
-        }
         if (state.playIdx >= state.sentences.length) {
-          if (state.playLimit < 0) {
-            /* 全文顺序模式读到文末不收尾，绕回第一句接着读，
-               只有暂停 / 停止才结束这次朗读；循环后没有中断点可言。 */
+          /* 全文循环：「全读」开且本次是全文范围（playLimit < 0）时，读到文末
+             不停止——从第一句接着读下一遍，一直循环，直到用户点停。
+             段落播放走不到这里收尾（下面按 playLimit 停），句读只读一句、
+             playLimit 就是那一句，同样不受影响。 */
+          if (state.fullRead && state.playLimit < 0 && state.sentences.length) {
             state.playIdx = 0;
+            state.playStart = 0;
             state.fullResumeIdx = -1;
+            state.activePara = -1;
           } else {
             state.fullResumeIdx = -1; stopSpeak(); return;
           }
         }
+        /* 段落播放（或只读一句）：读过范围末句就停，不往下一段走 */
         if (state.playLimit >= 0 && state.playIdx > state.playLimit) { stopSpeak(); return; }
-        markActive(state.playIdx);
+        if (state.sentenceMode) {
+          /* 句读模式：高亮不在点击时先挂——先清掉上一句的高亮、记下待确认的句子，
+             等 issueUtterance 的 onstart 确认真的出声了才挂上；出声失败就清掉，
+             不再出现「句子亮着、没有声音」。 */
+          state.pendingHlIdx = state.playIdx;
+          state.sentences.forEach(function (s) {
+            s.el.classList.remove('active');
+            s.el.classList.remove('looping');
+            s.el.classList.remove('sel');
+          });
+          state.selSent = -1;
+          updatePlayerStatus();
+        } else {
+          markActive(state.playIdx);
+        }
         var seq = ++state.speakSeq;
         state.speakRetry = 0;
         issueUtterance(seq);
@@ -2743,6 +2978,12 @@
           if (seq !== state.speakSeq) return;
           started = true;
           clearSpeakWatch();
+          if (state.sentenceMode) {
+            /* 确认出声了：这时才给正在读的句子挂高亮（连同选中态） */
+            state.pendingHlIdx = -1;
+            selectSentence(state.playIdx, false);
+            markActive(state.playIdx);
+          }
           armSpeakTimer(seq, text);
         };
         u.onend = function () { advanceSpeak(seq); };
@@ -2758,6 +2999,11 @@
           if (synth.speaking || synth.pending) {
             /* 引擎其实在读，只是这个浏览器不发 onstart：按已出声处理 */
             started = true;
+            if (state.sentenceMode) {
+              state.pendingHlIdx = -1;
+              selectSentence(state.playIdx, false);
+              markActive(state.playIdx);
+            }
             armSpeakTimer(seq, text);
             return;
           }
@@ -2770,6 +3016,12 @@
           }
           /* 重发一次仍没出声：停在当前句，不再往下跳，提示学习者再点一次播放 */
           if (state.playLimit < 0) state.fullResumeIdx = state.playIdx;
+          if (state.sentenceMode) {
+            /* 句读模式出声失败：待确认作废，高亮（若已挂上）一并清掉 */
+            state.pendingHlIdx = -1;
+            selectSentence(-1);
+            markActive(-1);
+          }
           state.paused = true;
           state.pausedAt = 0;
           clearSpeakTimer();
@@ -2785,7 +3037,7 @@
         state.paused = true;
         state.pausedAt = Date.now();
         /* 暂停的是全文：记下读到哪一句。之后点播放键从这一句接着读，
-           不从头；就算中间去复读某段，这个位置也留着（见 playFrom）。 */
+           不从头；就算中间去只读某段，这个位置也留着（见 playFrom）。 */
         if (state.playLimit < 0) state.fullResumeIdx = state.playIdx;
         clearSpeakTimer();
         clearSpeakWatch();
@@ -2822,34 +3074,33 @@
       }
 
       function playParagraph(para) {
-        /* 段落复读：只读本段，读到末句绕回本段第一句接着读
-           （speakCurrent 里按 repeatPara 绕回），循环到暂停 / 停止为止，
-           不往下一段走。当前播放模式是「单段复读」时，所有播放入口
-           （段首 ▶、段落标记、播放器主按钮）都走这里。 */
-        playFrom(para.sentStart, para.sentEnd, false, para.sentStart);
+        /* 段落播放：只读本段，读到末句就停（speakCurrent 里按 playLimit 收尾），
+           不往下一段走、也不循环。「全读」关时，段首 ▶、段落标记走这里。 */
+        playFrom(para.sentStart, para.sentEnd);
       }
 
-      /* 从某一段开始播放，走哪条路看当前播放模式（state.playMode，
-         由播放器设置里的循环按钮切换）：
-         「全文顺序」从本段往下读到文末再绕回开头；「单段复读」只循环本段。 */
+      /* 从某一段开始播放，走哪条路看「全读」开关（state.fullRead）：
+         开——从本段往下顺序读，读到全文结尾自动从头循环；关——只读本段，读完就停。 */
       function startParaPlayback(para) {
-        if (state.playMode === 'repeat') playParagraph(para);
-        else playFrom(para.sentStart);
+        if (state.fullRead) playFrom(para.sentStart);
+        else playParagraph(para);
       }
 
-      /* 从某一句开始播放（播放器主按钮 / 从选中句读）：同样看播放模式——
-         复读模式就复读这一句所在的段，顺序模式从这一句往下读全文。 */
+      /* 从某一句开始播放（播放器主按钮）：同样看「全读」开关——
+         开就从这一句往下读，读到全文结尾自动从头循环，关就从这一句读到它所在段落的末尾。 */
       function startFromIdx(idx) {
-        if (state.playMode === 'repeat') {
+        if (state.sentenceMode) { toast('句读模式：点正文里的句子读那一句'); return; }
+        if (!state.fullRead) {
           var pi = paraIndexOf(idx);
-          if (pi >= 0) { playParagraph(state.paragraphs[pi]); return; }
+          if (pi >= 0) { playFrom(idx, state.paragraphs[pi].sentEnd); return; }
         }
         playFrom(idx);
       }
 
-      /* 段首 ▶：从本段开始读，走当前播放模式（见 startParaPlayback）。
-         正在读的就是本段（不论顺序还是复读）时，这个按钮就是暂停 / 继续。 */
+      /* 段首 ▶：从本段开始读，走「全读」开关（见 startParaPlayback）。
+         正在读的就是本段时，这个按钮就是暂停 / 继续。 */
       function onParaPlayClick(para) {
+        if (state.sentenceMode) { toast('句读模式：点正文里的句子读那一句，长按或双击单词查词'); return; }
         if (!synth) { toast('这个浏览器不支持语音朗读，换 Chrome 或 Edge 试试'); return; }
         if (state.playing && state.activePara === para.index) {
           if (state.paused) resumeSpeak(); else pauseSpeak();
@@ -2859,9 +3110,10 @@
       }
 
       /* 播放器里的段落标记（第一段 / 第二段…）：跳到那一段开始读，
-         走当前播放模式——顺序模式从那段往下读，复读模式循环那一段；
+         走「全读」开关——开就从那段往下读、读到结尾自动从头循环，关就只读那一段；
          点正在读的那段是暂停 / 继续。 */
       function onParaChipClick(para) {
+        if (state.sentenceMode) { toast('句读模式：点正文里的句子读那一句，长按或双击单词查词'); return; }
         if (!synth) { toast('这个浏览器不支持语音朗读，换 Chrome 或 Edge 试试'); return; }
         if (state.playing && state.activePara === para.index) {
           if (state.paused) resumeSpeak(); else pauseSpeak();
@@ -2873,10 +3125,10 @@
       function playFrom(idx, limit, keepPanel, repeatFrom) {
         if (!synth) { toast('这个浏览器不支持语音朗读，换 Chrome 或 Edge 试试'); return; }
         if (!state.sentences.length) { toast('先导入一篇文章'); return; }
-        /* 全文读到一半（正在读或暂停着）时去点读某一句 / 复读某段：先把全文
+        /* 全文读到一半（正在读或暂停着）时去点读某一句 / 只读某段：先把全文
            读到的句子存下来，这个中断点不能被点读冲掉。
-           第 4 个参数 repeatFrom 是段落复读的绕回点：传了它，这次朗读就
-           只在本段内循环（limit 是本段末句，repeatFrom 是本段第一句）。 */
+           第 4 个参数 repeatFrom 是旧的段落复读绕回点，现已无入口传入，
+           仅为续播路径的调用签名保留，恒为 undefined。 */
         var isLimited = typeof limit === 'number';
         if (state.playing && state.playLimit < 0 && isLimited) {
           state.fullResumeIdx = state.playIdx;
@@ -2920,8 +3172,9 @@
         }
       }
 
-      function stopSpeak() {
+      function stopSpeak(keepPlayer) {
         state.speakSeq++;
+        state.pendingHlIdx = -1;
         clearSpeakTimer();
         clearSpeakWatch();
         if (synth) synth.cancel();
@@ -2937,16 +3190,22 @@
         refreshParaButtons();
         /* 注意：这里不清 fullResumeIdx。单句点读读完会自动走到这里，
            若在这里清掉，暂停全文后去点读一句，回来就又只能从头读了。
-           真正作废中断点的地方只有：换文章、全文读完（循环关时）、全文状态下按停止。 */
-        hidePlayer();
+           真正作废中断点的地方只有：换文章、全文状态下按停止（「全读」开时
+           全文是循环的，读到结尾会绕回开头继续，不在这里作废）。 */
+        /* 句读模式下播放器不跟着每句读完就收起：模式开关就在播放器里，
+           收起来就没法点下一句、也没法退出句读；明确按停止 / 关闭才收
+           （见 stopFromPlayer，它在 stopSpeak 之后自己调 hidePlayer）。 */
+        if (!keepPlayer && !state.sentenceMode) hidePlayer();
+        else updatePlayerStatus();
       }
 
       /* 播放器上的停止 / 关闭：正在读全文时按停，是明确结束这次全文朗读，
-         中断点一并作废，下次从头开始；正在复读某段时按停，
-         只停复读，之前存下的全文中断点保留，还能回去接着读。 */
+         中断点一并作废，下次从头开始；正在只读某段时按停，
+         只停这一段，之前存下的全文中断点保留，还能回去接着读。 */
       function stopFromPlayer() {
         if (state.playLimit < 0) state.fullResumeIdx = -1;
         stopSpeak();
+        hidePlayer();
       }
 
       $('btnPlay').addEventListener('click', function () {
@@ -2955,62 +3214,127 @@
           pauseSpeak();
         } else if (state.playing && state.paused) {
           resumeSpeak();
+        } else if (state.sentenceMode) {
+          /* 句读模式没有从头整篇播放：主按钮空闲时只提示去点句子；
+             正在读 / 暂停着一句时，上两个分支已经接管暂停 / 继续。 */
+          toast('句读模式：点正文里的句子读那一句');
         } else {
           startFromIdx(state.selSent >= 0 ? state.selSent : 0);
         }
       });
       $('btnStop').addEventListener('click', stopFromPlayer);
       $('btnClosePlayer').addEventListener('click', stopFromPlayer);
-      $('btnFromHere').addEventListener('click', function () {
-        startFromIdx(state.selSent >= 0 ? state.selSent : 0);
+      /* 「下一段」按钮（原「从选中句读」的位置）：跳到下一段开头接着读，
+         不受「全读」与「句读」控制——句读开着时先退出句读再跳段播放；
+         当前段按正在读的句子算，没在读就按选中句算，都没有就按第一段算。
+         到末段再点：「全读」开着就绕回第一段；关着就提示已是最后一段并停住。
+         跳过去之后读多大范围仍走 startParaPlayback（全读开往下读到结尾循环、
+         关只读这一段）。 */
+      $('btnNextPara').addEventListener('click', function () {
+        if (!synth) { toast('这个浏览器不支持语音朗读，换 Chrome 或 Edge 试试'); return; }
+        if (!state.paragraphs.length) { toast('先导入一篇文章'); return; }
+        var curIdx = state.playing ? state.playIdx
+          : (state.selSent >= 0 ? state.selSent : state.paragraphs[0].sentStart);
+        var cur = paraIndexOf(curIdx);
+        if (cur < 0) cur = 0;
+        var next = cur + 1;
+        if (next >= state.paragraphs.length) {
+          if (!state.fullRead) {
+            if (state.sentenceMode) {
+              state.sentenceMode = false;
+              refreshSentenceBtn();
+              refreshFullBtn();
+            }
+            stopSpeak(true);
+            toast('已经是最后一段');
+            return;
+          }
+          next = 0;
+        }
+        if (state.sentenceMode) {
+          state.sentenceMode = false;
+          refreshSentenceBtn();
+          refreshFullBtn();
+        }
+        startParaPlayback(state.paragraphs[next]);
+        toast('已跳到第 ' + (next + 1) + ' 段');
       });
 
-      /* 播放模式开关（循环按钮）：在「全文顺序」和「单段复读」之间切换。
-         这是复读 ⇄ 全文的唯一开关：所有播放入口都按当前模式走；
-         正在播放时点它，当前这次朗读立刻跟着变——复读切成顺序，
-         就从当前句往下读全文、不再绕回本段；顺序切成复读，
-         就锁定当前段循环读。选择存偏好，刷新不复位。 */
-      function refreshLoopBtn() {
-        var b = $('btnLoop');
+      /* 「全读」开关（播放器设置里带文字的胶囊按钮，代替旧的循环图标按钮）：
+         选中——全文循环播放：从当前处顺序读到全文结尾，自动从头再读，
+         一直循环直到点停；
+         不选——段落播放：只读当前段落一遍，读完就停。
+         所有播放入口（主按钮、下一段、段首 ▶、段落标记）都按它走；
+         正在播放时点它，当前这次朗读的范围立刻跟着变——打开就放开为全文循环，
+         关掉就收紧到当前句所在段落的末尾、读完本段就停。选中态靠 .is-active
+         的填充色标出，一眼能看出开没开。选择存偏好（prefs.fullRead），刷新不复位。
+         句读模式开启时禁用（见 refreshSentenceBtn）。 */
+      function refreshFullBtn() {
+        var b = $('btnFullRead');
         if (!b) return;
-        var rep = state.playMode === 'repeat';
-        b.setAttribute('aria-pressed', rep ? 'true' : 'false');
-        b.classList.toggle('loop-off', !rep);
-        b.title = rep ? '播放模式：单段复读（点按切换到全文顺序）' : '播放模式：全文顺序（点按切换到单段复读）';
+        var on = state.fullRead;
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        b.classList.toggle('is-active', on);
+        b.title = on ? '全读开：全文循环播放，读到结尾自动从头再读（点按关闭，改为只读当前段落）' : '全读关：只读当前段落（点按开启，全文循环播放）';
         b.setAttribute('aria-label', b.title);
       }
-      function applyPlayModeToSession() {
+      function applyFullReadToSession() {
         if (!state.playing) return;
-        if (state.playMode === 'seq') {
-          /* 正在复读（或只读一段 / 一句）→ 切成全文顺序：放开范围，
-             从当前句继续往下读，读到文末绕回开头 */
-          state.repeatPara = false;
-          state.repeatStart = -1;
+        state.repeatPara = false;
+        state.repeatStart = -1;
+        if (state.fullRead) {
+          /* 收紧的范围（一段 / 一句）→ 放开为全文循环：从当前句继续往下读，
+             读到结尾自动从头再读（见 speakCurrent 的文末绕回） */
           state.playLimit = -1;
           state.activePara = paraIndexOf(state.playIdx);
         } else {
-          /* 正在顺序读 → 切成单段复读：锁定当前句所在的段，
-             读完本段绕回本段第一句（speakCurrent 按 repeatPara 绕回） */
+          /* 全文循环 → 收紧到当前句所在的段落：读完本段末句就停，不再循环 */
           var pi = paraIndexOf(state.playIdx);
           if (pi < 0) return;
-          var para = state.paragraphs[pi];
-          state.repeatPara = true;
-          state.repeatStart = para.sentStart;
-          state.playLimit = para.sentEnd;
-          state.playStart = para.sentStart;
+          state.playLimit = state.paragraphs[pi].sentEnd;
           state.activePara = pi;
         }
+        markActive(state.playIdx);
         refreshParaButtons();
       }
-      $('btnLoop').addEventListener('click', function () {
-        state.playMode = state.playMode === 'repeat' ? 'seq' : 'repeat';
-        savePrefs({ playMode: state.playMode });
-        applyPlayModeToSession();
-        refreshLoopBtn();
+      $('btnFullRead').addEventListener('click', function () {
+        state.fullRead = !state.fullRead;
+        savePrefs({ fullRead: state.fullRead });
+        applyFullReadToSession();
+        refreshFullBtn();
         updatePlayerStatus();
-        toast(state.playMode === 'repeat' ? '已切换到单段复读：当前段会循环读' : '已切换到全文顺序：从当前句往下读，读到文末绕回开头');
+        toast(state.fullRead ? '全读开：全文循环，读到结尾自动从头再读' : '全读关：只读当前段落');
       });
-      refreshLoopBtn();
+      refreshFullBtn();
+
+      /* 句读模式开关（播放器设置里的「句读」按钮）：
+         开启——停掉正在进行的全文 / 段落播放（播放器保留，不收起），
+         「全读」开关禁用，段落播放入口（段首 ▶、段落标记）也关掉（「下一段」除外，它不受句读控制），
+         只剩点句播放（见 reader 的 click 处理）；fullRead 本身不动，
+         所以关闭句读就是原样恢复之前的全读开关状态。
+         关闭——停掉正在读的那一句，恢复「全读」开关，播放器保留。 */
+      function refreshSentenceBtn() {
+        var b = $('btnSentence');
+        if (!b) return;
+        var on = state.sentenceMode;
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        b.classList.toggle('is-active', on);
+        var full = $('btnFullRead');
+        if (full) full.disabled = on;
+        /* 「下一段」不受句读控制：句读开着时也不禁用它，点它会先退出句读再跳段 */
+      }
+      $('btnSentence').addEventListener('click', function () {
+        if (!synth) { toast('这个浏览器不支持语音朗读，换 Chrome 或 Edge 试试'); return; }
+        state.sentenceMode = !state.sentenceMode;
+        stopSpeak(true);
+        refreshSentenceBtn();
+        refreshFullBtn();
+        updatePlayerStatus();
+        toast(state.sentenceMode
+          ? '句读模式：点句子读那一句，长按或双击单词查词'
+          : '已退出句读，恢复原来的播放模式');
+      });
+      refreshSentenceBtn();
 
       /* 一次性发音（查词面板的单词 / 例句发音、复习卡的「听发音」）：
          正在朗读文章时不再把整段朗读掐断重来——先记下读到哪一句，
