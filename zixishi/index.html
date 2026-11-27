@@ -772,6 +772,37 @@
         .story-meta { margin-left: 0; flex: 1 1 100%; padding-left: .1rem; }
       }
 
+      /* ---------- 我的文章（IndexedDB 保存的导入文章清单） ---------- */
+      .my-articles { border-top: 1px solid var(--line); padding-top: .8rem; margin-top: .85rem; }
+      .my-articles[hidden] { display: none; }
+      .my-articles-head { display: flex; align-items: baseline; gap: .7rem; flex-wrap: wrap; margin-bottom: .3rem; }
+      .my-articles-head h3 { margin: 0; font-size: 1.02rem; font-family: var(--font-heading); }
+      .my-articles-count { margin-left: auto; color: var(--muted); font-size: .82rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+      .my-article-list { display: flex; flex-direction: column; }
+      .my-article-row {
+        display: flex; align-items: center; gap: .6rem;
+        padding: .35rem 0; border-bottom: 1px dashed var(--line);
+      }
+      .my-article-row:last-child { border-bottom: none; }
+      .my-article-open {
+        appearance: none; border: none; background: none; box-shadow: none;
+        flex: 1; min-width: 0; display: flex; align-items: baseline; gap: .7rem;
+        text-align: left; cursor: pointer; padding: .3rem .1rem; color: var(--ink);
+        min-height: 2.75rem;
+      }
+      .my-article-title {
+        font-family: var(--font-serif); font-weight: 700; font-size: .95rem;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+      }
+      .my-article-open:hover .my-article-title { color: var(--accent); }
+      .my-article-meta { margin-left: auto; flex: none; color: var(--muted); font-size: .8rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+      .my-article-del { flex: none; font-size: .85rem; }
+      @media (max-width: 560px) {
+        .my-article-open { flex-wrap: wrap; row-gap: .1rem; }
+        .my-article-meta { margin-left: 0; flex: 1 1 100%; }
+        .my-article-title { white-space: normal; }
+      }
+
       /* ---------- story quiz ---------- */
       .quiz-card {
         background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
@@ -1201,6 +1232,13 @@
               <button class="btn" id="btnSample" type="button">换示例文章</button>
             </div>
           </div>
+          <div class="my-articles" id="myArticles" hidden>
+            <div class="my-articles-head">
+              <h3>我的文章</h3>
+              <span class="my-articles-count" id="myArticlesCount"></span>
+            </div>
+            <div class="my-article-list" id="myArticlesList"></div>
+          </div>
           <div class="guide article-only" id="guideBar">
           <p>三步开始：<strong>点词</strong>查中文意思 → 点段首 <svg class="icon icon-14" aria-hidden="true"><use href="#i-play"></use></svg> 从本段开始读，读法看播放器设置里的<strong>「全读」</strong>开关：开着就从这里往下读，读到全文结尾自动从头再读、一直循环直到点停，关掉就只读当前这一段，读完就停；点任意一句只读那一句；点播放器里的段落标记「第一段、第二段…」跳到那一段开始读（同样看「全读」开关） → 查过的词会标黄，并自动进复习队列，在「今日复习」里翻卡片复习。</p>
           <button class="guide-close" id="btnGuideClose" type="button" aria-label="关闭引导"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg></button>
@@ -1262,7 +1300,7 @@
         </div>
         <div class="player-settings-clip" id="playerSettingsClip">
         <div class="player-settings" id="playerSettings" hidden>
-          <button class="pbtn" id="btnStop" type="button" aria-label="停止朗读">
+          <button class="pbtn" id="btnStop" type="button" aria-label="停止朗读（播放器保留）" title="只停朗读，播放器保留，点播放键可直接再读">
             <svg class="icon" aria-hidden="true"><use href="#i-stop"></use></svg>
           </button>
           <button class="pbtn-text" id="btnNextPara" type="button" aria-label="下一段：跳到下一段开头接着读" title="跳到下一段开头接着读，不受全读与句读控制">下一段</button>
@@ -1275,7 +1313,7 @@
           <label class="voice-label" id="voiceLabel">声音
             <select id="voiceSel" aria-label="选择朗读声音"></select>
           </label>
-          <button class="player-close" id="btnClosePlayer" type="button" aria-label="关闭播放器"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg></button>
+          <button class="player-close" id="btnClosePlayer" type="button" aria-label="关闭播放器" title="停朗读并关闭播放器"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg></button>
         </div>
         </div>
       </div>
@@ -3193,15 +3231,24 @@
            真正作废中断点的地方只有：换文章、全文状态下按停止（「全读」开时
            全文是循环的，读到结尾会绕回开头继续，不在这里作废）。 */
         /* 句读模式下播放器不跟着每句读完就收起：模式开关就在播放器里，
-           收起来就没法点下一句、也没法退出句读；明确按停止 / 关闭才收
-           （见 stopFromPlayer，它在 stopSpeak 之后自己调 hidePlayer）。 */
+           收起来就没法点下一句、也没法退出句读；只有明确按 × 关闭才收
+           （见 stopFromPlayer，它在 stopSpeak 之后自己调 hidePlayer；
+           ■ 停止走 stopOnlyFromPlayer，传 keepPlayer，播放器保留）。 */
         if (!keepPlayer && !state.sentenceMode) hidePlayer();
         else updatePlayerStatus();
       }
 
-      /* 播放器上的停止 / 关闭：正在读全文时按停，是明确结束这次全文朗读，
+      /* 播放器上的停止（■）与关闭（×）职责分开：
+         ■ 只停朗读，播放器不收——设置区收回一行小条，状态回到「准备朗读」，
+         点主播放键就能直接再读；× 停朗读并把整个播放器收掉。
+         两者对中断点的处理相同：正在读全文时按停，是明确结束这次全文朗读，
          中断点一并作废，下次从头开始；正在只读某段时按停，
          只停这一段，之前存下的全文中断点保留，还能回去接着读。 */
+      function stopOnlyFromPlayer() {
+        if (state.playLimit < 0) state.fullResumeIdx = -1;
+        stopSpeak(true);
+        setPlayerExpanded(false);
+      }
       function stopFromPlayer() {
         if (state.playLimit < 0) state.fullResumeIdx = -1;
         stopSpeak();
@@ -3222,7 +3269,7 @@
           startFromIdx(state.selSent >= 0 ? state.selSent : 0);
         }
       });
-      $('btnStop').addEventListener('click', stopFromPlayer);
+      $('btnStop').addEventListener('click', stopOnlyFromPlayer);
       $('btnClosePlayer').addEventListener('click', stopFromPlayer);
       /* 「下一段」按钮（原「从选中句读」的位置）：跳到下一段开头接着读，
          不受「全读」与「句读」控制——句读开着时先退出句读再跳段播放；
@@ -3965,6 +4012,146 @@
         return { html: out, any: any };
       }
 
+      /* ---------------- 我的文章：IndexedDB 本地保存 ----------------
+         只存用户自己导入的文章（.txt 导入 / 粘贴 / 拖拽）：刷新不丢，
+         在文章页头部卡的「我的文章」清单里打开、删除。
+         内置示例、推荐短文、生成文章、公版原著都不进这个库。
+         没有后端、没有账号：数据只存在这台设备这个浏览器里。 */
+      var IDB_DB = 'reading-lab', IDB_STORE = 'articles';
+      var idbOpenPromise = null;
+      function idbOpen() {
+        if (idbOpenPromise) return idbOpenPromise;
+        idbOpenPromise = new Promise(function (resolve, reject) {
+          if (!window.indexedDB) { reject(new Error('IndexedDB 不可用')); return; }
+          var req = indexedDB.open(IDB_DB, 1);
+          req.onupgradeneeded = function () {
+            if (!req.result.objectStoreNames.contains(IDB_STORE)) {
+              req.result.createObjectStore(IDB_STORE, { keyPath: 'id', autoIncrement: true });
+            }
+          };
+          req.onsuccess = function () { resolve(req.result); };
+          req.onerror = function () { reject(req.error); };
+          req.onblocked = function () { reject(new Error('IndexedDB 被占用')); };
+        });
+        return idbOpenPromise;
+      }
+      function idbAll() {
+        return idbOpen().then(function (db) {
+          return new Promise(function (resolve, reject) {
+            var req = db.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE).getAll();
+            req.onsuccess = function () { resolve(req.result || []); };
+            req.onerror = function () { reject(req.error); };
+          });
+        });
+      }
+      function idbAdd(rec) {
+        return idbOpen().then(function (db) {
+          return new Promise(function (resolve, reject) {
+            var req = db.transaction(IDB_STORE, 'readwrite').objectStore(IDB_STORE).add(rec);
+            req.onsuccess = function () { resolve(req.result); };
+            req.onerror = function () { reject(req.error); };
+          });
+        });
+      }
+      function idbRemove(id) {
+        return idbOpen().then(function (db) {
+          return new Promise(function (resolve, reject) {
+            var req = db.transaction(IDB_STORE, 'readwrite').objectStore(IDB_STORE).delete(id);
+            req.onsuccess = function () { resolve(); };
+            req.onerror = function () { reject(req.error); };
+          });
+        });
+      }
+      function countWordsIn(text) {
+        var m = String(text || '').match(/[A-Za-z]+(?:['\u2019\-][A-Za-z]+)*/g);
+        return m ? m.length : 0;
+      }
+      /* 粘贴的文章没有文件名：拿正文第一行当清单里的标题 */
+      function pasteSavedTitle(t) {
+        var first = (String(t).split(/\n+/)[0] || '').trim();
+        if (first.length > 42) first = first.slice(0, 42) + '…';
+        return first || '粘贴的文本';
+      }
+      /* 保存一篇导入的文章；正文完全相同的已经存过就不重复存。
+         返回 true 表示新存了一篇；已存过或保存失败返回 false（导入本身不受影响）。 */
+      function saveImportedArticle(title, text) {
+        return idbAll().then(function (list) {
+          for (var i = 0; i < list.length; i++) {
+            if (list[i].text === text) return false;
+          }
+          return idbAdd({ title: title, text: text, savedAt: Date.now(), words: countWordsIn(text) })
+            .then(function () { return true; });
+        }).then(function (added) {
+          if (added) renderMyArticles();
+          return added;
+        }).catch(function () { return false; });
+      }
+      function fmtSavedAt(ts) {
+        var d = new Date(ts);
+        function p2(n) { return (n < 10 ? '0' : '') + n; }
+        return (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + p2(d.getHours()) + ':' + p2(d.getMinutes());
+      }
+      function renderMyArticles() {
+        var box = $('myArticles'), listEl = $('myArticlesList');
+        if (!box || !listEl) return;
+        idbAll().then(function (list) {
+          list.sort(function (a, b) { return (b.savedAt || 0) - (a.savedAt || 0); });
+          listEl.innerHTML = '';
+          if (!list.length) { box.hidden = true; return; }
+          box.hidden = false;
+          $('myArticlesCount').textContent = '共 ' + list.length + ' 篇';
+          list.forEach(function (rec) {
+            var row = document.createElement('div');
+            row.className = 'my-article-row';
+            var openBtn = document.createElement('button');
+            openBtn.type = 'button';
+            openBtn.className = 'my-article-open';
+            var titleEl = document.createElement('span');
+            titleEl.className = 'my-article-title';
+            titleEl.textContent = rec.title || '未命名';
+            titleEl.title = rec.title || '';
+            var metaEl = document.createElement('span');
+            metaEl.className = 'my-article-meta';
+            metaEl.textContent = fmtSavedAt(rec.savedAt) + ' 保存 · ' + (rec.words || countWordsIn(rec.text)) + ' 词';
+            openBtn.appendChild(titleEl);
+            openBtn.appendChild(metaEl);
+            openBtn.addEventListener('click', function () {
+              loadText(rec.text, rec.title);
+              setView('article');
+              toast('已打开：' + (rec.title || ''));
+            });
+            var delBtn = document.createElement('button');
+            delBtn.type = 'button';
+            delBtn.className = 'btn my-article-del';
+            delBtn.textContent = '删除';
+            delBtn.setAttribute('aria-label', '删除这篇保存的文章：' + (rec.title || ''));
+            var armed = false, armTimer = 0;
+            delBtn.addEventListener('click', function () {
+              if (!armed) {
+                /* 第一次点只武装，按钮变「确认删除」，2.6 秒没点就自动还原 */
+                armed = true;
+                delBtn.textContent = '确认删除';
+                delBtn.classList.add('confirm-danger');
+                armTimer = setTimeout(function () {
+                  armed = false;
+                  delBtn.textContent = '删除';
+                  delBtn.classList.remove('confirm-danger');
+                }, 2600);
+                return;
+              }
+              clearTimeout(armTimer);
+              idbRemove(rec.id).then(function () {
+                renderMyArticles();
+                toast('已删除：' + (rec.title || ''));
+              }).catch(function () { toast('删除失败，再试一次'); });
+            });
+            row.appendChild(openBtn);
+            row.appendChild(delBtn);
+            listEl.appendChild(row);
+          });
+        }).catch(function () { box.hidden = true; });
+      }
+
       /* ---------------- import ---------------- */
 
       $('btnFile').addEventListener('click', function () { $('fileInput').click(); });
@@ -3973,7 +4160,9 @@
         if (!f) return;
         f.text().then(function (t) {
           loadText(t, f.name);
-          toast('已导入：' + f.name);
+          saveImportedArticle(f.name, t).then(function (added) {
+            toast(added ? '已导入并保存到「我的文章」：' + f.name : '已导入：' + f.name);
+          });
         }).catch(function () { toast('文件读取失败，换个文件试试'); });
         this.value = '';
       });
@@ -3990,7 +4179,9 @@
         if (!t) { toast('先粘贴一点英文文本'); return; }
         overlay.classList.remove('open');
         loadText(t, '粘贴的文本');
-        toast('已拆分，可以开始学了');
+        saveImportedArticle(pasteSavedTitle(t), t).then(function (added) {
+          toast(added ? '已拆分并保存到「我的文章」，可以开始学了' : '已拆分，可以开始学了');
+        });
       });
 
       var card = $('readerCard');
@@ -4003,7 +4194,12 @@
       card.addEventListener('drop', function (e) {
         var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
         if (f) {
-          f.text().then(function (t) { loadText(t, f.name); toast('已导入：' + f.name); })
+          f.text().then(function (t) {
+            loadText(t, f.name);
+            saveImportedArticle(f.name, t).then(function (added) {
+              toast(added ? '已导入并保存到「我的文章」：' + f.name : '已导入：' + f.name);
+            });
+          })
                 .catch(function () { toast('文件读取失败'); });
         }
       });
@@ -6320,6 +6516,7 @@ function genGenerate(level, env) {
       setRate(state.rate);   /* 把存下的语速同步回滑杆和 0.7× / 1× 快选 */
       if (prefs.guideHidden) $('guideBar').hidden = true;
       loadText(SAMPLES[0].text, SAMPLES[0].title, 0);
+      renderMyArticles();
       buildWordList();
       restoreTodayMarks();
       applyWordColors();
